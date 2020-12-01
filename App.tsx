@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   BackHandler,
+  Text,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import * as Font from "expo-font";
@@ -14,6 +15,7 @@ import { AppLoading } from "expo";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import Home from "./screens/Home";
 import AllNotes from "./screens/AllNotes";
 import {
@@ -28,6 +30,7 @@ import {
 import AddNote from "./screens/AddNote";
 import Animated, { Easing } from "react-native-reanimated";
 import Modal from "./widgets/Modal";
+import Settings from "./screens/Settings";
 
 const getFonts = () =>
   Font.loadAsync({
@@ -47,7 +50,13 @@ export default function App() {
     );
   } else {
     return (
-      <AppLoading startAsync={getFonts} onFinish={() => setFontLoaded(true)} />
+      <View>
+        <AppLoading
+          startAsync={getFonts}
+          onFinish={() => setFontLoaded(true)}
+        />
+        {/* <Text>hello world!</Text> */}
+      </View>
     );
   }
 }
@@ -62,11 +71,13 @@ const rewardMsgs = [
   "Way to go",
   "You rock",
   "Nice going",
-  "Congrats",
   "Good job",
 ];
+// "Congrats",
+
 const Main = () => {
   const [rewardMsgShow, setRewardMsgShow] = useState(false);
+  const [editNoteNumber, setEditNoteNumber] = useState(-1);
   const value = useRef(new Animated.Value(-Dimensions.get("window").height))
     .current;
   const isAddNoteOpen = useRef(false);
@@ -77,26 +88,29 @@ const Main = () => {
 
   const Stack = createStackNavigator();
   const Tabs = createBottomTabNavigator();
-  const showAddNote = (toValue: number) => {
+  const Drawer = createDrawerNavigator();
+
+  const showAddNote = (toValue: number, editNoteNumber?: number) => {
     isAddNoteOpen.current = !isAddNoteOpen.current;
+    if (editNoteNumber || editNoteNumber === 0) {
+      setEditNoteNumber(editNoteNumber);
+    }
     Animated.timing(value, {
       toValue: toValue,
       duration: 300,
       easing: Easing.ease,
     }).start();
   };
-  useEffect(() => {
-    BackHandler.addEventListener("hardwareBackPress", (e) => {
-      if (isAddNoteOpen.current) {
-        showAddNote(-Dimensions.get("window").height);
-        return true;
-      }
-    });
-  }, []);
 
   return (
     <>
       <StatusBar style='light' />
+      {/* <NavigationContainer>
+        <Drawer.Navigator initialRouteName='Home'>
+          <Drawer.Screen name='Home' component={Home} />
+          <Drawer.Screen name='AllNotes' component={AllNotes} />
+        </Drawer.Navigator>
+      </NavigationContainer> */}
       <NavigationContainer>
         {knowSpacedRepetition === EnumSpacedRepetition.No ? (
           <Stack.Navigator>
@@ -129,12 +143,18 @@ const Main = () => {
                     return (
                       <AntDesign name={iconName} size={size} color={color} />
                     );
-                  } else if (route.name === "KnowSpacedRepetition") {
-                    iconName = "bars";
+                  } else if (route.name === "Settings") {
+                    iconName = "setting";
                     return (
                       <AntDesign name={iconName} size={size} color={color} />
                     );
                   }
+                  // else if (route.name === "KnowSpacedRepetition") {
+                  //   iconName = "bars";
+                  //   return (
+                  //     <AntDesign name={iconName} size={size} color={color} />
+                  //   );
+                  // }
                 },
               })}
               tabBarOptions={{
@@ -144,42 +164,41 @@ const Main = () => {
               }}
             >
               <Tabs.Screen name='Home' component={Home} />
-              <Tabs.Screen name='AllNotes' component={AllNotes} />
+              <Tabs.Screen
+                name='AllNotes'
+                children={() => <AllNotes showAddNote={showAddNote} />}
+              />
+              <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
 
             <View
               style={{
                 borderRadius: 50,
                 position: "absolute",
-                bottom: 0,
-                left: "50%",
-                transform: [{ translateX: -28 }],
+                bottom: 50,
+                right: 10,
+                // transform: [{ translateX: -28 }],
               }}
             >
               <TouchableOpacity onPress={() => showAddNote(0)}>
                 <Ionicons name='ios-add-circle' size={70} color='#3178c6' />
               </TouchableOpacity>
             </View>
-            <View style={{ backgroundColor: "red" }}>
-              {rewardMsgShow && (
-                <>
-                  {console.log(
-                    rewardMsgs[Math.floor(Math.random() * rewardMsgs.length)]
-                  )}
-                  <Modal
-                    text={
-                      rewardMsgs[
-                        Math.floor(Math.random() * rewardMsgs.length)
-                      ] + "!"
-                    }
-                    noChat
-                    center
-                    color='#3178c6'
-                  />
-                </>
-              )}
-            </View>
+            {rewardMsgShow && (
+              <Modal
+                text={
+                  rewardMsgs[Math.floor(Math.random() * rewardMsgs.length)] +
+                  "!"
+                }
+                noChat
+                center
+                color='#3178c6'
+              />
+            )}
             <AddNote
+              isAddNoteOpen={isAddNoteOpen}
+              editNoteNumber={editNoteNumber}
+              setEditNoteNumber={setEditNoteNumber}
               value={value}
               showAddNote={showAddNote}
               noteAdded={() => {
@@ -210,7 +229,3 @@ export const styles = StyleSheet.create({
     fontFamily: "staatliches-regular",
   },
 });
-
-{
-  /* <KnowSpacedRepetition /> */
-}

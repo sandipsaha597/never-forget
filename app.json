@@ -4,9 +4,9 @@
     "slug": "never-forget",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/NFAppIcon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/NFicon2.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

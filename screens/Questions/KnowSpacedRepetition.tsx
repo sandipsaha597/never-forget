@@ -1,10 +1,12 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import React, { useContext } from "react";
+import { add, format } from "date-fns";
+import React, { useContext, useState } from "react";
 import { Button, Dimensions, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import WebView from "react-native-webview";
 import { styles } from "../../App";
 import { AppContext, EnumSpacedRepetition } from "../../AppContext/AppContext";
+import Dropdown from "../../widgets/Dropdown";
 import Modal from "../../widgets/Modal";
 
 export function KnowSpacedRepetition({ navigation }: any) {
@@ -40,6 +42,9 @@ export function KnowSpacedRepetition({ navigation }: any) {
 }
 
 export const VideoScreen = ({ navigation }: any) => {
+  const [selected, setSelected] = useState("English");
+  const [text, setText] = useState("custom===the guy above===");
+
   const {
     actions: { setKnowSpacedRepetition },
   } = useContext<any>(AppContext);
@@ -58,7 +63,23 @@ export const VideoScreen = ({ navigation }: any) => {
       {
         id: "8193959100",
         text: "No, please explain",
-        reply: "Do you understand hindi?",
+        reply: `It's basically a way of revising effectively. If you study\
+ something today and don't revise it, you will forget almost\
+ everything within a week or so(photographic memory excluded).\
+ It means all of your hard work, time, energy is wasted.\n\
+To prevent this we can use space repetition technique. In this\
+ amazing technique we revise whatever we wanna remember in a\
+ spaced manner. Suppose today${format(
+   new Date(),
+   "dd-MMM-yyyy"
+ )} you studied something so you will \
+ revise it tomorrow ${format(add(new Date(), { days: 1 }), "dd-MMM-yyyy")}`,
+
+        // format(add(new Date(), { days: 1 }), "dd-MMM-yyyy")
+        //       add(new Date()), { days: 1 })
+        // add(new Date()), { weeks: 1 })
+        // add(new Date()), { months: 1 })
+        // add(new Date()), { months: 3 })
         indent: [
           {
             id: "7194853010",
@@ -91,7 +112,27 @@ export const VideoScreen = ({ navigation }: any) => {
   ];
   return (
     <>
-      <Video />
+      {selected === "English" ? <Video /> : <VideoHindi />}
+      <Dropdown
+        title='Switch video language'
+        selected={selected}
+        setSelected={(val) => {
+          setSelected(val);
+          if (val === "English") {
+            setText("custom===the guy above===");
+          } else {
+            setText("custom===the guy above hindi===");
+          }
+        }}
+        options={[
+          { id: "3413449123", title: "English" },
+          { id: "3489124389", title: "Hindi" },
+        ]}
+      />
+      <Text>
+        amit kakkar, physics gold medalist, b.tech gold medalist, M.S. IIT delhi
+        - gold medalist
+      </Text>
       <View
         style={{
           flex: 1,
@@ -110,12 +151,22 @@ export const VideoScreen = ({ navigation }: any) => {
         <Text>I didn't understand</Text>
         <Text>I don't understand this language</Text>
         <Text>
-          It's basically a way of revising effectively. If you study something
-          today and don't revise it, you will forget almost everything within a
-          week or so(photographic memory excluded). It means all of your hard
-          work, time, energy is wasted. It's called forgetting curve.
-        </Text> */}
-        <Modal text='custom===the guy above===' chatObj={chatObj} scroll />
+        It's basically a way of revising effectively. If you study something
+        today and don't revise it, you will forget almost everything within a
+        week or so(photographic memory excluded). It means all of your hard
+        work, time, energy is wasted. It's called forgetting curve.
+      </Text> */}
+        {selected === "English" ? (
+          <Modal text='custom===the guy above===' chatObj={chatObj} scroll />
+          // <Text>hello</Text>
+        ) : (
+          // <Text>hi</Text>
+          <Modal
+            text='custom===the guy above hindi==='
+            chatObj={chatObj}
+            scroll
+          />
+        )}
       </View>
     </>
   );
@@ -125,6 +176,18 @@ const Video = () => {
   return (
     <WebView
       source={{ uri: "https://sandipsaha597.github.io/never-forget-iframes/" }}
+      style={{ flex: 0, height: Dimensions.get("window").width / 1.78 }}
+      containerStyle={{ flex: 0 }}
+    />
+  );
+};
+const VideoHindi = () => {
+  return (
+    <WebView
+      source={{
+        uri:
+          "https://sandipsaha597.github.io/never-forget-iframes/spaced-repetition-in-hindi.html",
+      }}
       style={{ flex: 0, height: Dimensions.get("window").width / 1.78 }}
       containerStyle={{ flex: 0 }}
     />

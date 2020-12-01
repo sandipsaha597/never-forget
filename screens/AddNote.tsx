@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Dimensions, Keyboard, Text, View } from "react-native";
+import { BackHandler, Dimensions, Keyboard, Text, View } from "react-native";
 import {
   ScrollView,
   TextInput,
@@ -15,6 +15,7 @@ import { add, startOfDay } from "date-fns/esm";
 import { v4 as uuidv4 } from "uuid";
 import Modal from "../widgets/Modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isAnyNoteActiveFunc } from "../util/util";
 
 const chatObj = [
   [
@@ -27,25 +28,67 @@ const chatObj = [
       id: "7194853255",
       text: "Thanks!",
       reply: "You're welcome",
-    }
+    },
   ],
 ];
 export default function AddNote(props: {
+  isAddNoteOpen: any;
   value: any;
+  editNoteNumber: number;
+  setEditNoteNumber: (index: number) => void;
   showAddNote: (val: number) => void;
   noteAdded: () => void;
 }) {
-  const { value, showAddNote, noteAdded } = props;
+  const {
+    isAddNoteOpen,
+    value,
+    editNoteNumber,
+    setEditNoteNumber,
+    showAddNote,
+    noteAdded,
+  } = props;
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [firstNote, setFirstNote] = useState(true);
 
   const {
     states: { subs, allNotes },
-    actions: { setAllNotes },
-    constants: {mainColor}
+    actions: { setAllNotes, setIsAnyNoteActive },
+    constants: { mainColor },
   } = useContext<any>(AppContext);
   const [selected, setSelected] = useState(subs[0].title);
+
+  useEffect(() => {
+    setItem(setFirstNote, "firstNote");
+  }, []);
+  
+  useEffect(() => {
+    setSelected(subs[0].title);
+  }, [subs]);
+
+  useEffect(() => {
+    if (editNoteNumber !== -1) {
+      setTitle(allNotes[editNoteNumber].title);
+      setDesc(allNotes[editNoteNumber].desc);
+      setSelected(allNotes[editNoteNumber].subject);
+    }
+  }, [editNoteNumber, allNotes]);
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", () => {
+      if (isAddNoteOpen.current) {
+        showAddNote(-Dimensions.get("window").height);
+        if (editNoteNumber >= 0) {
+          setTimeout(() => {
+            setTitle("");
+            setDesc("");
+            setEditNoteNumber(-1);
+          }, 1000);
+        }
+        return true;
+      }
+    });
+  }, [editNoteNumber]);
 
   const addNote = () => {
     let allRevisions = [startOfDay(new Date())];
@@ -55,24 +98,32 @@ export default function AddNote(props: {
     allRevisions.push(add(startOfDay(new Date()), { months: 3 }));
 
     const tempAllNotes = [...allNotes];
+
+    // for (let i = 0; i < 6000; i++) {
     tempAllNotes.unshift({
       id: uuidv4(),
-      title,
+      title: title,
+      // title: title + i,
       desc,
       subject: selected,
       revisions: allRevisions,
       revisionNumber: 0,
+      delete: false,
+      show: true,
     });
+    // }
     setAllNotes(tempAllNotes);
-    Keyboard.dismiss();
-    noteAdded();
+    setIsAnyNoteActive(true);
+    setTimeout(() => {
+      Keyboard.dismiss();
+      noteAdded();
+    }, 10);
     setTimeout(() => {
       setTitle("");
       setDesc("");
     }, 1000);
   };
   // AsyncStorage.removeItem("firstNote");
-
   const setItem = async (toSet: any, itemName: string) => {
     const value = await AsyncStorage.getItem(itemName);
     if (value !== "false") {
@@ -82,9 +133,22 @@ export default function AddNote(props: {
     }
   };
 
-  useEffect(() => {
-    setItem(setFirstNote, "firstNote");
-  }, []);
+  const editNote = () => {
+    let tempAllNotes = [...allNotes];
+    tempAllNotes[editNoteNumber].title = title;
+    tempAllNotes[editNoteNumber].desc = desc;
+    tempAllNotes[editNoteNumber].subject = selected;
+    setAllNotes(tempAllNotes);
+
+    setTimeout(() => {
+      Keyboard.dismiss();
+    }, 10);
+    setTimeout(() => {
+      setTitle("");
+      setDesc("");
+      setEditNoteNumber(-1);
+    }, 1000);
+  };
 
   return (
     <Animated.View
@@ -113,6 +177,13 @@ export default function AddNote(props: {
           onPress={() => {
             showAddNote(-Dimensions.get("window").height);
             Keyboard.dismiss();
+            if (editNoteNumber >= 0) {
+              setTimeout(() => {
+                setTitle("");
+                setDesc("");
+                setEditNoteNumber(-1);
+              }, 500);
+            }
           }}
         >
           <MaterialIcons name='arrow-back' size={24} color='white' />
@@ -121,8 +192,13 @@ export default function AddNote(props: {
           style={{ padding: 10, opacity: title.trim() === "" ? 0.4 : 1 }}
           disabled={title.trim() === "" ? true : false}
           onPress={() => {
-            showAddNote(-Dimensions.get("window").height);
-            addNote();
+            if (editNoteNumber >= 0) {
+              showAddNote(-Dimensions.get("window").height);
+              editNote();
+            } else {
+              showAddNote(-Dimensions.get("window").height);
+              addNote();
+            }
           }}
         >
           <AntDesign name='check' size={24} color='white' />
@@ -135,7 +211,7 @@ export default function AddNote(props: {
           }}
         >
           <Text style={[styles.headingText, { color: "white", marginTop: 0 }]}>
-            What you learned today?
+            {editNoteNumber !== -1 ? "Note Edit" : "What you learned today?"}
           </Text>
           <TextInput
             style={{
@@ -157,6 +233,7 @@ export default function AddNote(props: {
             options={subs}
             selected={selected}
             setSelected={setSelected}
+            addInput
             deleteAble
           />
           <TextInput

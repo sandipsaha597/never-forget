@@ -36,6 +36,10 @@ export default function Modal(props: {
 }) {
   const { text, noChat, center, color, chatObj, scroll } = props;
   const [chat, setChat] = useState<any>(chatObj);
+
+  useEffect(() => {
+  }, [text]);
+
   const {
     constants: { rewardMsgTimeoutTime },
   } = useContext<any>(AppContext);
@@ -122,8 +126,7 @@ export default function Modal(props: {
     }
   };
 
-  const scrollViewRef = useRef();
-
+  const scrollViewRef = useRef<any>();
   return (
     <Animated.View
       style={{
@@ -135,99 +138,123 @@ export default function Modal(props: {
         margin: 10,
         width: center ? "auto" : "86%",
         overflow: "hidden",
-        height: scroll ? "100%" : "auto",
+        height: scroll ? "90%" : "auto",
+        flex: 1,
         justifyContent: "flex-end",
       }}
     >
-      <View style={{}}>
-        <ScrollView
-          style={{
-            backgroundColor: center ? "transparent" : "green",
-            paddingHorizontal: 10,
-          }}
-          ref={scrollViewRef}
-          onContentSizeChange={() =>
-            scrollViewRef.current.scrollToEnd({ animated: true })
+      <ScrollView
+        style={{
+          backgroundColor: center ? "transparent" : "#fff",
+          paddingHorizontal: 10,
+          paddingBottom: 10,
+        }}
+        ref={scrollViewRef}
+        onContentSizeChange={(contentWidth, contentHeight) => {
+          if (!center) {
+            setTimeout(() => {
+              scrollViewRef.current.scrollToEnd({ animated: true });
+            }, 200);
           }
+        }}
+      >
+        <Text
+          style={{
+            backgroundColor: color ? color : "#E0E0E0",
+            marginTop: 10,
+            padding: 10,
+            marginRight: 10,
+            borderRadius: 4,
+            maxWidth: center ? "100%" : "93%",
+            textAlign: center ? "center" : "left",
+          }}
         >
-          <Text
-            style={{
-              backgroundColor: color ? color : "#E0E0E0",
-              marginTop: 10,
-              padding: 10,
-              marginRight: 10,
-              borderRadius: 4,
-              maxWidth: "93%",
-            }}
-          >
-            {text.startsWith("custom") ? (
-              text.includes("===the guy above===") ? (
-                <Text>
-                  The Guy above isn't me. His name is Matty. Their youtube
-                  channel:
-                  <OpenURLButton
-                    url={
-                      "https://www.youtube.com/channel/UCBX_-ls-dXuhFNSWSXcHrTA"
-                    }
-                  >
-                    Matt &amp; Matty
-                  </OpenURLButton>
-                  {"\n \n"}
-                  The YouTube video link: {"\n"}
-                  <OpenURLButton
-                    url={"https://www.youtube.com/watch?v=VkPlQ4gjk8M"}
-                  >
-                    https://www.youtube.com/watch?v={"\n"}VkPlQ4gjk8M
-                  </OpenURLButton>
-                  {"\n \n"}They explained spaced repetition very well. So did
-                  you understand what spaced repetition is? It's crucial to use
-                  this app correctly.
-                </Text>
-              ) : (
-                ""
-              )
-            ) : (
-              text
-            )}
-          </Text>
+          {text.startsWith("custom") ? (
+            text.includes("===the guy above===") ? (
+              <Text>
+                The Guy above isn't me. His name is Matty. Their youtube
+                channel:
+                <OpenURLButton
+                  url={
+                    "https://www.youtube.com/channel/UCBX_-ls-dXuhFNSWSXcHrTA"
+                  }
+                >
+                  Matt &amp; Matty
+                </OpenURLButton>
+                {"\n \n"}
+                The YouTube video link: {"\n"}
+                <OpenURLButton
+                  url={"https://www.youtube.com/watch?v=VkPlQ4gjk8M"}
+                >
+                  https://www.youtube.com/watch?v={"\n"}VkPlQ4gjk8M
+                </OpenURLButton>
+                {"\n \n"}They explained spaced repetition very well. So did you
+                understand what spaced repetition is? It's crucial to use this
+                app correctly.
+              </Text>
+            ) : text.includes("===the guy above hindi===") ? (
+              <Text>
+                The Guy above isn't me. His name is Amit Kakkar. His youtube
+                channel:
+                <OpenURLButton
+                  url={
+                    "https://www.youtube.com/channel/UCClj0UjhdYaR-WR-RHBVOww"
+                  }
+                >
+                  AMIT KAKKAR SPEAKS
+                </OpenURLButton>
+                {"\n \n"}
+                The YouTube video link: {"\n"}
+                <OpenURLButton
+                  url={"https://www.youtube.com/watch?v=OccJMq7AtSE"}
+                >
+                  https://www.youtube.com/watch?v={"\n"}OccJMq7AtSE
+                </OpenURLButton>
+                {"\n \n"}They explained spaced repetition very well. So did you
+                understand what spaced repetition is? It's crucial to use this
+                app correctly.
+              </Text>
+            ) : null
+          ) : (
+            text
+          )}
+        </Text>
 
-          {!noChat &&
-            chat.map((v: any, i1: number) => (
-              <View
-                key={i1}
-                style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  justifyContent: i1 % 2 === 0 ? "flex-end" : "flex-start",
-                  marginTop: 10,
-                }}
-              >
-                {v.map((j: any, i2: number) => (
-                  <TouchableOpacity
-                    activeOpacity={
-                      i1 % 2 === 0 && i1 === chat.length - 1 ? 0.7 : 1
-                    }
-                    key={j.id}
-                    onPress={() =>
-                      i1 % 2 === 0 && i1 === chat.length - 1
-                        ? reply(j, i1, i2)
-                        : {}
-                    }
-                    style={{
-                      backgroundColor: i1 % 2 === 0 ? "#3178c6" : "#E0E0E0",
-                      padding: 10,
-                      marginLeft: i1 % 2 === 0 ? 10 : 0,
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Text>{j.text}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            ))}
-        
-        </ScrollView>
-      </View>
+        {!noChat &&
+          chat.map((v: any, i1: number) => (
+            <View
+              key={i1}
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: i1 % 2 === 0 ? "flex-end" : "flex-start",
+                marginTop: 10,
+              }}
+            >
+              {v.map((j: any, i2: number) => (
+                <TouchableOpacity
+                  activeOpacity={
+                    i1 % 2 === 0 && i1 === chat.length - 1 ? 0.7 : 1
+                  }
+                  key={j.id}
+                  onPress={() =>
+                    i1 % 2 === 0 && i1 === chat.length - 1
+                      ? reply(j, i1, i2)
+                      : {}
+                  }
+                  style={{
+                    backgroundColor: i1 % 2 === 0 ? "#3178c6" : "#E0E0E0",
+                    padding: 10,
+                    marginLeft: i1 % 2 === 0 ? 10 : 0,
+                    borderRadius: 4,
+                  }}
+                >
+                  <Text>{j.text}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+      </ScrollView>
     </Animated.View>
   );
 }

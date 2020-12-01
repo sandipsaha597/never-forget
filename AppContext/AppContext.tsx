@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { startOfDay } from "date-fns";
-import { te } from "date-fns/esm/locale";
 import React, { useState, createContext, useEffect, useRef } from "react";
+import { LayoutAnimation, NativeModules, Platform } from "react-native";
 import { v4 as uuidV4 } from "uuid";
+import { isAnyNoteActiveFunc } from "../util/util";
 
 export const AppContext = createContext();
 
@@ -11,11 +11,22 @@ export enum EnumSpacedRepetition {
   Yes = "yes",
 }
 
+const { UIManager } = NativeModules;
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 export function AppProvider(props: any) {
-  const [knowSpacedRepetition, setKnowSpacedRepetition] = useState<
-    EnumSpacedRepetition
-  >(EnumSpacedRepetition.No);
+  const [
+    knowSpacedRepetition,
+    setKnowSpacedRepetition,
+  ] = useState<EnumSpacedRepetition>(EnumSpacedRepetition.No);
   const [allNotes, setAllNotes] = useState<IAllNotes[]>([]);
+  const [isAnyNoteActive, setIsAnyNoteActive] = useState<boolean>(null);
   // const [subs, setSubs] = useState<string[]>([
   //   "English",
   //   "Math",
@@ -54,6 +65,7 @@ export function AppProvider(props: any) {
       knowSpacedRepetition,
       allNotes,
       subs,
+      isAnyNoteActive,
     },
     constants: {
       rewardMsgTimeoutTime: 2000,
@@ -61,9 +73,20 @@ export function AppProvider(props: any) {
       externalLinkColor: "#296ab3",
     },
     actions: {
-      async setAllNotes(values: IAllNotes[]) {
+      async setAllNotes(values: IAllNotes[], save: boolean = true) {
         try {
-          await AsyncStorage.setItem("allNotes", JSON.stringify(values));
+          if (save) {
+            await AsyncStorage.setItem("allNotes", JSON.stringify(values));
+          }
+          // LayoutAnimation.easeInEaseOut();
+          // LayoutAnimation.configureNext(
+          //   LayoutAnimation.create(
+          //     500,
+          //     LayoutAnimation.Types.easeInEaseOut,
+          //     LayoutAnimation.Properties.scaleXY
+          //   )
+          // );
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           setAllNotes(values);
         } catch (err) {
           alert(err);
@@ -82,10 +105,20 @@ export function AppProvider(props: any) {
           console.log("err", err);
         }
       },
-      async setSubs(values: string[]) {
+      async setSubs(values: { id: string; title: string }[]) {
         try {
           await AsyncStorage.setItem("subs", JSON.stringify(values));
+          LayoutAnimation.easeInEaseOut();
           setSubs(values);
+        } catch (err) {
+          alert(err);
+          console.log("err", err);
+        }
+      },
+      async setIsAnyNoteActive(val: boolean) {
+        try {
+          await AsyncStorage.setItem("isAnyNoteActive", JSON.stringify(val));
+          setIsAnyNoteActive(val);
         } catch (err) {
           alert(err);
           console.log("err", err);
@@ -94,6 +127,8 @@ export function AppProvider(props: any) {
     },
   };
   // AsyncStorage.removeItem('knowSpacedRepetition')
+  // AsyncStorage.removeItem('allNotes')
+  // AsyncStorage.removeItem('isAnyNoteActive')
   // AsyncStorage.removeItem('subs')
 
   // contextValue.actions.setSubs([
@@ -112,10 +147,26 @@ export function AppProvider(props: any) {
     }
   };
 
+  const retrieveAllNotesDeleteStatus = async () => {
+    if (isAnyNoteActive === null) {
+      const storedIsAnyNoteActive = await AsyncStorage.getItem(
+        "isAnyNoteActive"
+      );
+      if (
+        storedIsAnyNoteActive === "false" ||
+        storedIsAnyNoteActive === "true"
+      ) {
+        setIsAnyNoteActive(JSON.parse(storedIsAnyNoteActive));
+      } else {
+        isAnyNoteActiveFunc(allNotes, contextValue.actions.setIsAnyNoteActive);
+      }
+    }
+  };
   useEffect(() => {
     setItem(setAllNotes, "allNotes");
     setItem(setKnowSpacedRepetition, "knowSpacedRepetition");
     setItem(setSubs, "subs");
+    retrieveAllNotesDeleteStatus();
   }, []);
 
   useEffect(() => {
@@ -147,4 +198,6 @@ export interface IAllNotes {
   desc: string;
   revisions: any;
   revisionNumber: number;
+  delete: boolean;
+  show: boolean;
 }
