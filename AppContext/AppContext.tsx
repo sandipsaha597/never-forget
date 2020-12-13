@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { cancelAllScheduledNotificationsAsync } from "expo-notifications";
 import React, { useState, createContext, useEffect, useRef } from "react";
 import { LayoutAnimation, NativeModules, Platform } from "react-native";
 import { v4 as uuidV4 } from "uuid";
@@ -129,6 +130,7 @@ export function AppProvider(props: any) {
   // AsyncStorage.removeItem('knowSpacedRepetition')
   // AsyncStorage.removeItem('allNotes')
   // AsyncStorage.removeItem('isAnyNoteActive')
+  // cancelAllScheduledNotificationsAsync()
   // AsyncStorage.removeItem('subs')
 
   // contextValue.actions.setSubs([
@@ -196,6 +198,7 @@ export interface IAllNotes {
   title: string;
   subject: string;
   desc: string;
+  pattern: number[];
   revisions: any;
   revisionNumber: number;
   delete: boolean;

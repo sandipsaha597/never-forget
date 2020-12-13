@@ -1,5 +1,14 @@
-import React, { memo, useContext, useEffect, useState } from "react";
-import { Button, Dimensions, Image, Text, TextInput, View } from "react-native";
+import React, { memo, useContext, useEffect, useRef, useState } from "react";
+import {
+  BackHandler,
+  Button,
+  Dimensions,
+  Image,
+  LayoutAnimation,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { AppContext } from "../AppContext/AppContext";
 import { FontAwesome } from "@expo/vector-icons";
 import {
@@ -10,6 +19,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { isAnyNoteActiveFunc } from "../util/util";
 import Dropdown from "../widgets/Dropdown";
+import { schedulePushNotification } from "./AddNote";
 
 export default function AllNotes(props: {
   showAddNote: (value: number, editNoteNumber: number) => void;
@@ -17,6 +27,7 @@ export default function AllNotes(props: {
   const { showAddNote } = props;
   const [subjectFilterSelected, setSubjectFilterSelected] = useState("All");
   const [searchText, setSearchText] = useState<boolean | string>(false);
+  const TextInputRef = useRef<any>();
   const {
     states: { allNotes, isAnyNoteActive, subs },
     actions: { setAllNotes, setIsAnyNoteActive },
@@ -29,19 +40,15 @@ export default function AllNotes(props: {
     ...subs,
   ]);
 
-  // useEffect(() => {
-  //   let tempSubs = [...subs]
-  //   tempSubs.unshift('All')
-  // }, [subs])
-
-  const deleteNote = (index: any, id: any) => {
+  const deleteNote = (index: any, id: any, note: any) => {
     let tempAllNotes = [...allNotes];
     // tempAllNotes = tempAllNotes.filter((v) => v.id !== id);
     tempAllNotes[index].delete = true;
     setAllNotes(tempAllNotes);
     isAnyNoteActiveFunc(allNotes, setIsAnyNoteActive);
+
+    schedulePushNotification(note, 'delete', '')
   };
-  console.log("=================");
   const editNote = (index: number) => {
     showAddNote(0, index);
     let tempAllNotes = [...allNotes];
@@ -64,8 +71,6 @@ export default function AllNotes(props: {
         }
       });
     }
-    console.log("tempAllNotes 2", tempAllNotes);
-    // console.log("allNotes", allNotes);
     setAllNotes(tempAllNotes, false);
     setSubjectFilterSelected(val);
   };
@@ -90,8 +95,6 @@ export default function AllNotes(props: {
     setSearchText(val);
   };
 
-  console.log("allNotes", allNotes);
-
   return isAnyNoteActive && allNotes.length !== 0 ? (
     <View style={{ backgroundColor: "#fff", flex: 1 }}>
       <View
@@ -111,7 +114,15 @@ export default function AllNotes(props: {
           />
         </View>
         <View style={{ marginRight: 10 }}>
-          <TouchableNativeFeedback onPress={() => setSearchText("")}>
+          <TouchableNativeFeedback
+            onPress={() => {
+              LayoutAnimation.configureNext(
+                LayoutAnimation.Presets.easeInEaseOut
+              );
+              TextInputRef.current.focus();
+              setSearchText("");
+            }}
+          >
             <AntDesign name='search1' size={24} color='black' />
           </TouchableNativeFeedback>
         </View>
@@ -120,21 +131,28 @@ export default function AllNotes(props: {
         style={{
           position: "absolute",
           top: searchText || searchText === "" ? 0 : -54,
-          backgroundColor: "dodgerblue",
+          backgroundColor: "#3178c6",
           width: "100%",
           padding: 13,
           flexDirection: "row",
           alignItems: "center",
         }}
       >
-        <TouchableNativeFeedback onPress={() => searchFilter(false)}>
+        <TouchableNativeFeedback
+          onPress={() => {
+            TextInputRef.current.blur();
+            searchFilter(false);
+          }}
+        >
           <AntDesign name='arrowleft' size={24} color='black' />
         </TouchableNativeFeedback>
         <TextInput
+          ref={TextInputRef}
           placeholder='Search...'
+          underlineColorAndroid='#3178c6'
           value={searchText ? searchText : ""}
           onChangeText={(val) => searchFilter(val)}
-          style={{ marginLeft: 10 }}
+          style={{ marginLeft: 10, width: "80%" }}
         />
       </View>
       <FlatList
@@ -177,11 +195,10 @@ export default function AllNotes(props: {
 const NoteBox = (props: {
   note: any;
   itemIndex: number;
-  deleteNote: (index: any, id: any) => void;
+  deleteNote: (index: any, id: any, note: any) => void;
   editNote: (index: number) => void;
 }) => {
   const { note, itemIndex, deleteNote, editNote } = props;
-  console.log("render allnotes", itemIndex);
   return (
     <View
       style={{
@@ -263,7 +280,7 @@ const NoteBox = (props: {
         </TouchableNativeFeedback>
         <TouchableNativeFeedback
           onPress={() => {
-            deleteNote(itemIndex, note.id);
+            deleteNote(itemIndex, note.id, note);
           }}
           style={{ alignSelf: "flex-end" }}
         >

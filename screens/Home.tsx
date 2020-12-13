@@ -44,7 +44,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const date = { active: false, days: 9, hours: 0 };
+const date = { active: false, days: 1, hours: 0 };
 const rewardMsgs = [
   "Well Done",
   "Bravo",
@@ -123,7 +123,7 @@ export default function Home() {
     }, 10);
   };
 
-  const skip = (itemIndex: number, id: string) => {
+  const skip = (itemIndex: number) => {
     const tempAllNotes = [...allNotes];
     // let index = undefined;
     // tempAllNotes.find((v, i) => {
