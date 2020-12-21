@@ -163,7 +163,10 @@ const Main = () => {
                 showLabel: false,
               }}
             >
-              <Tabs.Screen name='Home' component={Home} />
+              <Tabs.Screen
+                name='Home'
+                children={() => <Home showAddNote={showAddNote} />}
+              />
               <Tabs.Screen
                 name='AllNotes'
                 children={() => <AllNotes showAddNote={showAddNote} />}
@@ -171,7 +174,7 @@ const Main = () => {
               <Tabs.Screen name='Settings' component={Settings} />
             </Tabs.Navigator>
 
-            <View
+            {/* <View
               style={{
                 borderRadius: 50,
                 position: "absolute",
@@ -183,7 +186,7 @@ const Main = () => {
               <TouchableOpacity onPress={() => showAddNote(0)}>
                 <Ionicons name='ios-add-circle' size={70} color='#3178c6' />
               </TouchableOpacity>
-            </View>
+            </View> */}
             {rewardMsgShow && (
               <Modal
                 text={

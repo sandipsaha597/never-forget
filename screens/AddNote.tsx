@@ -144,7 +144,7 @@ export default function AddNote(props: {
     }, 1000);
   };
   console.log("=====================");
-  // Notifications.getAllScheduledNotificationsAsync().then((v) => console.log(v));
+  Notifications.getAllScheduledNotificationsAsync().then((v) => console.log(v));
 
   // Notifications.cancelAllScheduledNotificationsAsync()
   // AsyncStorage.removeItem("firstNote");
@@ -159,8 +159,10 @@ export default function AddNote(props: {
 
   const editNote = () => {
     let tempAllNotes = [...allNotes];
-    if (tempAllNotes[editNoteNumber].title !== title) {
-      schedulePushNotification(tempAllNotes[editNoteNumber], "edit", title);
+    console.log("editnote", tempAllNotes[editNoteNumber]);
+    const note = {...tempAllNotes[editNoteNumber]}
+    if (note.title !== title) {
+      schedulePushNotification(note, "edit", title);
     }
     tempAllNotes[editNoteNumber].title = title;
     tempAllNotes[editNoteNumber].desc = desc;
@@ -298,15 +300,19 @@ export async function schedulePushNotification(
   type: string | boolean,
   title: string
 ) {
-  // for (let i = note.revisionNumber + 1; i < note.revisions.length; i++) {
-  for (let i = note.revisionNumber + 1; i < note.revisionNumber + 2; i++) {
+  for (let i = note.revisionNumber + 1; i < note.revisions.length; i++) {
+  // for (let i = note.revisionNumber + 1; i < note.revisionNumber + 2; i++) {
     Notifications.getAllScheduledNotificationsAsync().then(
       (allNotifications) => {
         const revisionDate = new Date(note.revisions[i]);
         const notificationObj = allNotifications.find(
           (v) => v.identifier === format(revisionDate, "dd-MM-yyyy")
         );
-        let body;
+        console.log(
+          "note======================================================================================",
+          note, title
+        );
+        let body = "raw";
         if (notificationObj) {
           if (type === "delete") {
             if (
@@ -339,7 +345,6 @@ export async function schedulePushNotification(
             }
             console.log("delete", body);
           } else if (type === "edit") {
-            console.log("inside edit");
             if (
               notificationObj?.content.body?.includes(
                 "🗒️ " + note.title + " 📖" + "\n"
@@ -347,8 +352,7 @@ export async function schedulePushNotification(
             ) {
               body = notificationObj?.content.body?.replace(
                 "🗒️ " + note.title + " 📖" + "\n",
-                // "🗒️ " + title + " 📖" + "\n"
-                "edited"
+                "🗒️ " + title + " 📖" + "\n"
               );
             } else if (
               notificationObj?.content.body?.includes(
@@ -368,12 +372,7 @@ export async function schedulePushNotification(
                 "🗒️ " + note.title + " 📖",
                 "🗒️ " + title + " 📖"
               );
-            }
-            // body = notificationObj?.content.body?.replace(
-            //   note.title + "\n",
-            //   title + "\n"
-            // );
-            console.log("edit", notificationObj.content.body, note.title);
+            } 
           } else {
             body = "🗒️ " + title + " 📖" + "\n" + notificationObj.content.body;
           }
@@ -381,17 +380,15 @@ export async function schedulePushNotification(
           body = "🗒️ " + title + " 📖";
         }
 
-        console.log("body", body);
         const trigger =
           body === ""
             ? -100
             : differenceInSeconds(
                 // add(startOfDay(new Date()), { days: 0, hours: 13, minutes: 11 }),
-                add(new Date(note.revisions[0]), { hours: 19, minutes: 39 }),
-                // add(revisionDate, { hours: 6 }),
+                // add(new Date(note.revisions[0]), { hours: 14, minutes: 18 }),
+                add(revisionDate, { hours: 6 }),
                 new Date()
               );
-        console.log("trigger", trigger);
         Notifications.scheduleNotificationAsync({
           content: {
             title: "Review your notes, so you Never Forget them! 📔",
@@ -401,7 +398,6 @@ export async function schedulePushNotification(
           identifier: format(revisionDate, "dd-MM-yyyy"),
           trigger: { seconds: trigger },
         });
-        // console.log("allNotifications", allNotifications);
       }
     );
   }

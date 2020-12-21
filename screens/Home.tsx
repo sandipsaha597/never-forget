@@ -1,31 +1,21 @@
-import {
-  add,
-  differenceInDays,
-  format,
-  isBefore,
-  isEqual,
-  isFuture,
-  isSameDay,
-  sub,
-} from "date-fns";
+import { differenceInDays, isFuture, sub } from "date-fns";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
-  Button,
   Dimensions,
   Image,
-  LayoutAnimation,
   NativeModules,
   Platform,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import {
   FlatList,
   TouchableNativeFeedback,
 } from "react-native-gesture-handler";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
+
 import { AppContext, IAllNotes } from "../AppContext/AppContext";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 import Modal from "../widgets/Modal";
 
@@ -59,11 +49,12 @@ const rewardMsgs = [
 ];
 // "Congrats",
 
-export default function Home() {
+export default function Home(props: { showAddNote: (value: number) => void }) {
   const [rewardMsgShow, setRewardMsgShow] = useState(false);
   const [notesToRevise, setNotesToRevise] = useState<boolean>(true);
   const currentRewardMsg = useRef("Well done");
   const [rewardIcon, setRewardIcon] = useState(null);
+  const { showAddNote } = props;
 
   useEffect(() => {
     currentRewardMsg.current =
@@ -144,50 +135,91 @@ export default function Home() {
     setAllNotes(tempAllNotes);
   };
 
-  return isAnyNoteActive && allNotes.length !== 0 ? (
-    <View style={{ backgroundColor: "#fff", flex: 1, padding: 10 }}>
-      {date.active && (
-        <>
-          <Text>
-            {JSON.stringify(
-              sub(new Date(), {
-                days: date.days,
-                hours: date.hours,
-              })
-            )}
-          </Text>
-          <Text>{JSON.stringify(new Date())}</Text>
-        </>
-      )}
-      {notesToRevise ? (
-        <FlatList
-          data={allNotes}
-          renderItem={({ item, index }: any) => {
-            return !item.delete &&
-              !isFuture(
-                sub(new Date(item.revisions[item.revisionNumber + 1]), {
-                  days: date.days,
-                  hours: date.hours,
-                })
-              ) ? (
-              <ReviewBox
-                itemIndex={index}
-                disabled={rewardMsgShow}
-                note={item as IAllNotes}
-                markAsRevised={markAsRevised}
-                skip={skip}
+  return (
+    <>
+      {isAnyNoteActive && allNotes.length !== 0 ? (
+        <View style={{ backgroundColor: "#fff", flex: 1, padding: 10 }}>
+          {date.active && (
+            <>
+              <Text>
+                {JSON.stringify(
+                  sub(new Date(), {
+                    days: date.days,
+                    hours: date.hours,
+                  })
+                )}
+              </Text>
+              <Text>{JSON.stringify(new Date())}</Text>
+            </>
+          )}
+          {notesToRevise ? (
+            <FlatList
+              contentContainerStyle={{ paddingBottom: 60 }}
+              data={allNotes}
+              renderItem={({ item, index }: any) => {
+                return !item.delete &&
+                  !isFuture(
+                    sub(new Date(item.revisions[item.revisionNumber + 1]), {
+                      days: date.days,
+                      hours: date.hours,
+                    })
+                  ) ? (
+                  <ReviewBox
+                    itemIndex={index}
+                    disabled={rewardMsgShow}
+                    note={item as IAllNotes}
+                    markAsRevised={markAsRevised}
+                    skip={skip}
+                  />
+                ) : null;
+              }}
+              keyExtractor={(item: any) => item.id}
+            />
+          ) : (
+            <View
+              style={{
+                height: Dimensions.get("window").height - 80,
+                backgroundColor: "#fff",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Image
+                style={{
+                  width: "50%",
+                  height: Dimensions.get("window").width / 2.1,
+                }}
+                source={rewardIcon}
               />
-            ) : null;
-          }}
-          keyExtractor={(item) => item.id}
-        />
+              <Text
+                style={{
+                  fontSize: 26,
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Congrats! You have done all your revisions on time!
+              </Text>
+            </View>
+          )}
+
+          {rewardMsgShow && (
+            <Modal
+              text={currentRewardMsg.current + "!"}
+              noChat
+              center
+              color='#3178c6'
+            />
+          )}
+        </View>
       ) : (
         <View
           style={{
-            height: Dimensions.get("window").height - 80,
+            flex: 1,
             backgroundColor: "#fff",
             justifyContent: "center",
             alignItems: "center",
+            padding: 10,
           }}
         >
           <Image
@@ -195,51 +227,25 @@ export default function Home() {
               width: "50%",
               height: Dimensions.get("window").width / 2.1,
             }}
-            source={rewardIcon}
+            source={require("../assets/icons/box.png")}
           />
-          <Text
-            style={{
-              fontSize: 26,
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            Congrats! You have done all your revisions on time!
-          </Text>
+          <Text>No Notes yet</Text>
         </View>
       )}
-
-      {rewardMsgShow && (
-        <Modal
-          text={currentRewardMsg.current + "!"}
-          noChat
-          center
-          color='#3178c6'
-        />
-      )}
-    </View>
-  ) : (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#fff",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 10,
-      }}
-    >
-      {/* <AntDesign
-        name='folderopen'
-        style={{ opacity: 0.5 }}
-        size={150}
-        color='black'
-      /> */}
-      <Image
-        style={{ width: "50%", height: Dimensions.get("window").width / 2.1 }}
-        source={require("../assets/icons/box.png")}
-      />
-      <Text>No Notes yet</Text>
-    </View>
+      <View
+        style={{
+          borderRadius: 50,
+          position: "absolute",
+          bottom: 0,
+          right: 10,
+          // transform: [{ translateX: -28 }],
+        }}
+      >
+        <TouchableOpacity onPress={() => showAddNote(0)}>
+          <Ionicons name='ios-add-circle' size={70} color='#3178c6' />
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 

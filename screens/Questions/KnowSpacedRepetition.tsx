@@ -118,21 +118,21 @@ To prevent this we can use space repetition technique. In this\
         selected={selected}
         setSelected={(val) => {
           setSelected(val);
-          if (val === "English") {
-            setText("custom===the guy above===");
-          } else {
-            setText("custom===the guy above hindi===");
-          }
+          // if (val === "English") {
+          //   setText("custom===the guy above===");
+          // } else {
+          //   setText("custom===the guy above hindi===");
+          // }
         }}
         options={[
           { id: "3413449123", title: "English" },
           { id: "3489124389", title: "Hindi" },
         ]}
       />
-      <Text>
+      {/* <Text>
         amit kakkar, physics gold medalist, b.tech gold medalist, M.S. IIT delhi
         - gold medalist
-      </Text>
+      </Text> */}
       <View
         style={{
           flex: 1,

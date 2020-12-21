@@ -38,6 +38,7 @@ export default function Modal(props: {
   const [chat, setChat] = useState<any>(chatObj);
 
   useEffect(() => {
+    setChat(chatObj);
   }, [text]);
 
   const {
@@ -144,29 +145,29 @@ export default function Modal(props: {
       }}
     >
       <ScrollView
-        style={{
+        contentContainerStyle={{
           backgroundColor: center ? "transparent" : "#fff",
-          paddingHorizontal: 10,
-          paddingBottom: 10,
+          // paddingHorizontal: 10,
+          // paddingBottom: 10
+          padding: 10
         }}
         ref={scrollViewRef}
         onContentSizeChange={(contentWidth, contentHeight) => {
           if (!center) {
             setTimeout(() => {
               scrollViewRef.current.scrollToEnd({ animated: true });
-            }, 200);
+            }, 1000);
           }
         }}
       >
-        <Text
+        <View
           style={{
             backgroundColor: color ? color : "#E0E0E0",
-            marginTop: 10,
+            // marginTop: 10,
             padding: 10,
             marginRight: 10,
             borderRadius: 4,
             maxWidth: center ? "100%" : "93%",
-            textAlign: center ? "center" : "left",
           }}
         >
           {text.startsWith("custom") ? (
@@ -216,9 +217,9 @@ export default function Modal(props: {
               </Text>
             ) : null
           ) : (
-            text
+            <Text style={{ textAlign: center ? "center" : "left" }}>{text}</Text>
           )}
-        </Text>
+        </View>
 
         {!noChat &&
           chat.map((v: any, i1: number) => (

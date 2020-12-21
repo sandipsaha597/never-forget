@@ -3,7 +3,7 @@ import { cancelAllScheduledNotificationsAsync } from "expo-notifications";
 import React, { useState, createContext, useEffect, useRef } from "react";
 import { LayoutAnimation, NativeModules, Platform } from "react-native";
 import { v4 as uuidV4 } from "uuid";
-import { isAnyNoteActiveFunc } from "../util/util";
+import { isAnyNoteActiveFunc, isRecycleBinEmptyFunc } from "../util/util";
 
 export const AppContext = createContext();
 
@@ -27,7 +27,10 @@ export function AppProvider(props: any) {
     setKnowSpacedRepetition,
   ] = useState<EnumSpacedRepetition>(EnumSpacedRepetition.No);
   const [allNotes, setAllNotes] = useState<IAllNotes[]>([]);
-  const [isAnyNoteActive, setIsAnyNoteActive] = useState<boolean>(null);
+  const [isAnyNoteActive, setIsAnyNoteActive] = useState<boolean | null>(null);
+  const [isRecycleBinEmpty, setIsRecycleBinEmpty] = useState<boolean | null>(
+    null
+  );
   // const [subs, setSubs] = useState<string[]>([
   //   "English",
   //   "Math",
@@ -67,6 +70,7 @@ export function AppProvider(props: any) {
       allNotes,
       subs,
       isAnyNoteActive,
+      isRecycleBinEmpty,
     },
     constants: {
       rewardMsgTimeoutTime: 2000,
@@ -125,12 +129,22 @@ export function AppProvider(props: any) {
           console.log("err", err);
         }
       },
+      async setIsRecycleBinEmpty(val: boolean) {
+        try {
+          await AsyncStorage.setItem("isRecycleBinEmpty", JSON.stringify(val));
+          setIsRecycleBinEmpty(val);
+        } catch (err) {
+          alert(err);
+          console.log("err", err);
+        }
+      },
     },
   };
   // AsyncStorage.removeItem('knowSpacedRepetition')
-  // AsyncStorage.removeItem('allNotes')
-  // AsyncStorage.removeItem('isAnyNoteActive')
-  // cancelAllScheduledNotificationsAsync()
+  // AsyncStorage.removeItem("allNotes");
+  // AsyncStorage.removeItem("isAnyNoteActive");
+  // AsyncStorage.removeItem("isRecycleBinEmpty");
+  // cancelAllScheduledNotificationsAsync();
   // AsyncStorage.removeItem('subs')
 
   // contextValue.actions.setSubs([
@@ -149,7 +163,7 @@ export function AppProvider(props: any) {
     }
   };
 
-  const retrieveAllNotesDeleteStatus = async () => {
+  const retrieveAllNotesDeleteAndRecycleBinStatus = async () => {
     if (isAnyNoteActive === null) {
       const storedIsAnyNoteActive = await AsyncStorage.getItem(
         "isAnyNoteActive"
@@ -163,12 +177,29 @@ export function AppProvider(props: any) {
         isAnyNoteActiveFunc(allNotes, contextValue.actions.setIsAnyNoteActive);
       }
     }
+
+    if (isRecycleBinEmpty === null) {
+      const storedIsRecycleBinEmpty = await AsyncStorage.getItem(
+        "isRecycleBinEmpty"
+      );
+      if (
+        storedIsRecycleBinEmpty === "false" ||
+        storedIsRecycleBinEmpty === "true"
+      ) {
+        setIsRecycleBinEmpty(JSON.parse(storedIsRecycleBinEmpty));
+      } else {
+        isRecycleBinEmptyFunc(
+          allNotes,
+          contextValue.actions.setIsRecycleBinEmpty
+        );
+      }
+    }
   };
   useEffect(() => {
     setItem(setAllNotes, "allNotes");
     setItem(setKnowSpacedRepetition, "knowSpacedRepetition");
     setItem(setSubs, "subs");
-    retrieveAllNotesDeleteStatus();
+    retrieveAllNotesDeleteAndRecycleBinStatus();
   }, []);
 
   useEffect(() => {
