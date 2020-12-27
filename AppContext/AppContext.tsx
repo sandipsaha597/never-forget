@@ -31,6 +31,7 @@ export function AppProvider(props: any) {
   const [isRecycleBinEmpty, setIsRecycleBinEmpty] = useState<boolean | null>(
     null
   );
+  const [animations, setAnimations] = useState<"On" | "Off">("On");
   // const [subs, setSubs] = useState<string[]>([
   //   "English",
   //   "Math",
@@ -69,6 +70,7 @@ export function AppProvider(props: any) {
       knowSpacedRepetition,
       allNotes,
       subs,
+      animations,
       isAnyNoteActive,
       isRecycleBinEmpty,
     },
@@ -83,15 +85,10 @@ export function AppProvider(props: any) {
           if (save) {
             await AsyncStorage.setItem("allNotes", JSON.stringify(values));
           }
-          // LayoutAnimation.easeInEaseOut();
-          // LayoutAnimation.configureNext(
-          //   LayoutAnimation.create(
-          //     500,
-          //     LayoutAnimation.Types.easeInEaseOut,
-          //     LayoutAnimation.Properties.scaleXY
-          //   )
-          // );
-          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          animations === "On" &&
+            LayoutAnimation.configureNext(
+              LayoutAnimation.Presets.easeInEaseOut
+            );
           setAllNotes(values);
         } catch (err) {
           alert(err);
@@ -138,14 +135,25 @@ export function AppProvider(props: any) {
           console.log("err", err);
         }
       },
+      async setAnimations(val: boolean) {
+        try {
+          await AsyncStorage.setItem("animations", JSON.stringify(val));
+          setAnimations(val);
+        } catch (err) {
+          alert(err);
+          console.log("err", err);
+        }
+      },
     },
   };
   // AsyncStorage.removeItem('knowSpacedRepetition')
+  // AsyncStorage.removeItem("firstNote");
   // AsyncStorage.removeItem("allNotes");
   // AsyncStorage.removeItem("isAnyNoteActive");
   // AsyncStorage.removeItem("isRecycleBinEmpty");
   // cancelAllScheduledNotificationsAsync();
   // AsyncStorage.removeItem('subs')
+  // AsyncStorage.removeItem('animations')
 
   // contextValue.actions.setSubs([
   //   "English",
@@ -159,7 +167,15 @@ export function AppProvider(props: any) {
   const setItem = async (toSet: any, itemName: string) => {
     const value = await AsyncStorage.getItem(itemName);
     if (value) {
-      toSet(JSON.parse(value) as any);
+      if (itemName === "allNotes") {
+        const tempValue = JSON.parse(value);
+        tempValue.forEach((v: any) => {
+          v.show = true;
+        });
+        toSet(tempValue);
+      } else {
+        toSet(JSON.parse(value) as any);
+      }
     }
   };
 
@@ -199,6 +215,7 @@ export function AppProvider(props: any) {
     setItem(setAllNotes, "allNotes");
     setItem(setKnowSpacedRepetition, "knowSpacedRepetition");
     setItem(setSubs, "subs");
+    setItem(setAnimations, "animations");
     retrieveAllNotesDeleteAndRecycleBinStatus();
   }, []);
 

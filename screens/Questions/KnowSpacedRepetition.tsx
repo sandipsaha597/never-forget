@@ -66,45 +66,76 @@ export const VideoScreen = ({ navigation }: any) => {
         reply: `It's basically a way of revising effectively. If you study\
  something today and don't revise it, you will forget almost\
  everything within a week or so(photographic memory excluded).\
- It means all of your hard work, time, energy is wasted.\n\
+ Which means all of your hard work, time, energy is wasted.\n\
 To prevent this we can use space repetition technique. In this\
  amazing technique we revise whatever we wanna remember in a\
- spaced manner. Suppose today${format(
+ spaced manner. Suppose today ${format(
    new Date(),
    "dd-MMM-yyyy"
  )} you studied something so you will \
- revise it tomorrow ${format(add(new Date(), { days: 1 }), "dd-MMM-yyyy")}`,
-
-        // format(add(new Date(), { days: 1 }), "dd-MMM-yyyy")
-        //       add(new Date()), { days: 1 })
-        // add(new Date()), { weeks: 1 })
-        // add(new Date()), { months: 1 })
-        // add(new Date()), { months: 3 })
+ revise it tomorrow (${format(add(new Date(), { days: 1 }), "dd-MMM-yyyy")}),\
+ then after 7 days (${format(
+   add(new Date(), { days: 7 }),
+   "dd-MMM-yyyy"
+ )}), then after 30 days (${format(
+          add(new Date(), { days: 30 }),
+          "dd-MMM-yyyy"
+        )})\
+ then after 90 days (${format(add(new Date(), { days: 90 }), "dd-MMM-yyyy")}),\
+ then after 365 days (${format(
+   add(new Date(), { days: 365 }),
+   "dd-MMM-yyyy"
+ )}). The pattern here was 1-7-30-90-365. There are other famous patterns like 1-3-7-30-90, 1-3-7-15-30-90 etc as well.\
+ Like this the information will store in your long term memory, it will become very easy for you to recall and you will Never Forget what's important for you.\n\
+So did you understand what spaced repetition is? It's crucial to use this app correctly.`,
         indent: [
           {
             id: "7194853010",
             text: "Yes",
-            reply: "Switching to Hindi...",
-            indent: [
-              {
-                id: "7194853010",
-                text: "1",
-                reply: "2",
-                indent: [
-                  {
-                    id: "7194853010",
-                    text: "Yes",
-                    reply:
-                      "2 lorem flsad l naewj s a sd fkask ajsf sdklf jaoef sadf asf ew avdfw fdasdl;fk asdfsdfksajdfkasjdfkasj dfls k",
-                  },
-                ],
-              },
-            ],
+            reply: "Excellent",
+            executeFunction: () => {
+              setTimeout(() => {
+                setKnowSpacedRepetition(true);
+              }, 1500);
+            },
           },
           {
             id: "7194873955",
             text: "No",
-            reply: "Sorry",
+            reply:
+              "Please try searching for 'Forgetting curve', 'spaced repetition' and/or 'spacing effect'. Done? So did you\
+understand what spaced repetition is? It's crucial to use this\
+app correctly.",
+            indent: [
+              {
+                id: "9284719402",
+                text: "Yes",
+                reply: "Excellent",
+                executeFunction: () => {
+                  setTimeout(() => {
+                    setKnowSpacedRepetition(true);
+                  }, 1500);
+                },
+              },
+              {
+                id: "3135616781",
+                text: "No",
+                reply:
+                  "🤔 🤔 I don't know how else to explain. But no issues come inside.",
+                indent: [
+                  {
+                    id: "9284719402",
+                    text: "🚀",
+                    reply: "🚀",
+                    executeFunction: () => {
+                      setTimeout(() => {
+                        setKnowSpacedRepetition(true);
+                      }, 1500);
+                    },
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
@@ -113,32 +144,36 @@ To prevent this we can use space repetition technique. In this\
   return (
     <>
       {selected === "English" ? <Video /> : <VideoHindi />}
-      <Dropdown
-        title='Switch video language'
-        selected={selected}
-        setSelected={(val) => {
-          setSelected(val);
-          // if (val === "English") {
-          //   setText("custom===the guy above===");
-          // } else {
-          //   setText("custom===the guy above hindi===");
-          // }
+      <View
+        style={{
+          backgroundColor: "#fff",
+          paddingLeft: 15,
+          position: "relative",
+          zIndex: 1,
         }}
-        options={[
-          { id: "3413449123", title: "English" },
-          { id: "3489124389", title: "Hindi" },
-        ]}
-      />
-      {/* <Text>
-        amit kakkar, physics gold medalist, b.tech gold medalist, M.S. IIT delhi
-        - gold medalist
-      </Text> */}
+      >
+        <Dropdown
+          title='Switch video language'
+          selected={selected}
+          setSelected={(val) => {
+            setSelected(val);
+            // if (val === "English") {
+            //   setText("custom===the guy above===");
+            // } else {
+            //   setText("custom===the guy above hindi===");
+            // }
+          }}
+          options={[
+            { id: "3413449123", title: "English" },
+            { id: "3489124389", title: "Hindi" },
+          ]}
+        />
+      </View>
       <View
         style={{
           flex: 1,
           overflow: "hidden",
-          backgroundColor: "red",
-          marginTop: 10,
+          // marginTop: 10,
         }}
       >
         {/* <Text>
@@ -158,8 +193,8 @@ To prevent this we can use space repetition technique. In this\
       </Text> */}
         {selected === "English" ? (
           <Modal text='custom===the guy above===' chatObj={chatObj} scroll />
-          // <Text>hello</Text>
         ) : (
+          // <Text>hello</Text>
           // <Text>hi</Text>
           <Modal
             text='custom===the guy above hindi==='

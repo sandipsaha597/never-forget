@@ -5,6 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/NFAppIcon.png",
+    "notification": {
+      "icon": "./assets/NFAppIcon.png"
+    },
     "splash": {
       "image": "./assets/NFicon2.png",
       "resizeMode": "contain",
@@ -17,7 +20,10 @@
       "**/*"
     ],
     "android": {
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"  
+      }
     },
     "ios": {
       "supportsTablet": true

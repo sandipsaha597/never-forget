@@ -147,9 +147,7 @@ export default function Modal(props: {
       <ScrollView
         contentContainerStyle={{
           backgroundColor: center ? "transparent" : "#fff",
-          // paddingHorizontal: 10,
-          // paddingBottom: 10
-          padding: 10
+          padding: 10,
         }}
         ref={scrollViewRef}
         onContentSizeChange={(contentWidth, contentHeight) => {
@@ -211,50 +209,62 @@ export default function Modal(props: {
                 >
                   https://www.youtube.com/watch?v={"\n"}OccJMq7AtSE
                 </OpenURLButton>
-                {"\n \n"}They explained spaced repetition very well. So did you
+                {"\n"}
+                <Text>
+                  He's a physics gold medalist, b.tech gold medalist, M.S. IIT
+                  delhi - gold medalist
+                </Text>
+                {"\n \n"}He explained spaced repetition very well. So did you
                 understand what spaced repetition is? It's crucial to use this
                 app correctly.
               </Text>
             ) : null
           ) : (
-            <Text style={{ textAlign: center ? "center" : "left" }}>{text}</Text>
+            <Text
+              style={{ textAlign: center ? "center" : "left", color: "#fff" }}
+            >
+              {text}
+            </Text>
           )}
         </View>
 
         {!noChat &&
-          chat.map((v: any, i1: number) => (
-            <View
-              key={i1}
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: i1 % 2 === 0 ? "flex-end" : "flex-start",
-                marginTop: 10,
-              }}
-            >
-              {v.map((j: any, i2: number) => (
-                <TouchableOpacity
-                  activeOpacity={
-                    i1 % 2 === 0 && i1 === chat.length - 1 ? 0.7 : 1
-                  }
-                  key={j.id}
-                  onPress={() =>
-                    i1 % 2 === 0 && i1 === chat.length - 1
-                      ? reply(j, i1, i2)
-                      : {}
-                  }
-                  style={{
-                    backgroundColor: i1 % 2 === 0 ? "#3178c6" : "#E0E0E0",
-                    padding: 10,
-                    marginLeft: i1 % 2 === 0 ? 10 : 0,
-                    borderRadius: 4,
-                  }}
-                >
-                  <Text>{j.text}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ))}
+          chat.map((v: any, i1: number) => {
+            const isReply = i1 % 2 === 0;
+            return (
+              <View
+                key={i1}
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: isReply ? "flex-end" : "flex-start",
+                  maxWidth: isReply ? '100%' : '93%'
+                }}
+              >
+                {v.map((j: any, i2: number) => (
+                  <TouchableOpacity
+                    activeOpacity={isReply && i1 === chat.length - 1 ? 0.7 : 1}
+                    key={j.id}
+                    onPress={() =>
+                      isReply && i1 === chat.length - 1 ? reply(j, i1, i2) : {}
+                    }
+                    style={{
+                      backgroundColor: isReply ? "#3178c6" : "#E0E0E0",
+                      padding: 10,
+                      marginTop: 10,
+
+                      marginLeft: isReply ? 10 : 0,
+                      borderRadius: 4,
+                    }}
+                  >
+                    <Text style={{ color: isReply ? "#ededed" : "#000" }}>
+                      {j.text}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+          })}
       </ScrollView>
     </Animated.View>
   );

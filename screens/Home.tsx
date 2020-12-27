@@ -18,6 +18,8 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { AppContext, IAllNotes } from "../AppContext/AppContext";
 
 import Modal from "../widgets/Modal";
+import { AdMobInterstitial, AdMobRewarded } from "expo-ads-admob";
+import { rewardMsgs } from "../App";
 
 const { UIManager } = NativeModules;
 const congratsIcons = [
@@ -34,19 +36,8 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const date = { active: false, days: 1, hours: 0 };
-const rewardMsgs = [
-  "Well Done",
-  "Bravo",
-  "Keep up the good work",
-  "Awesome",
-  "Great",
-  "Hats off",
-  "Way to go",
-  "You rock",
-  "Nice going",
-  "Good job",
-];
+const date = { active: false, days: 0, hours: 0 };
+
 // "Congrats",
 
 export default function Home(props: { showAddNote: (value: number) => void }) {
@@ -135,10 +126,33 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
     setAllNotes(tempAllNotes);
   };
 
+  const showAd = async () => {
+    await AdMobInterstitial.setAdUnitID(
+      "ca-app-pub-3940256099942544/1033173712"
+    ); // Test ID, Replace with your-admob-unit-id
+    await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true });
+    setTimeout(async () => {
+      await AdMobInterstitial.showAdAsync();
+    }, 12000);
+  };
+
+  const showAd2 = async () => {
+    await AdMobRewarded.setAdUnitID("ca-app-pub-3940256099942544/5224354917"); // Test ID, Replace with your-admob-unit-id
+    await AdMobRewarded.requestAdAsync();
+    await AdMobRewarded.showAdAsync();
+    // setTimeout( async () => {
+    // }, 2000);
+  };
+
+  useEffect(() => {
+    // showAd();
+    // showAd2();
+  }, []);
+
   return (
     <>
       {isAnyNoteActive && allNotes.length !== 0 ? (
-        <View style={{ backgroundColor: "#fff", flex: 1, padding: 10 }}>
+        <View style={{ backgroundColor: "#fff", flex: 1 }}>
           {date.active && (
             <>
               <Text>
@@ -205,7 +219,7 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
 
           {rewardMsgShow && (
             <Modal
-              text={currentRewardMsg.current + "!"}
+              text={currentRewardMsg.current}
               noChat
               center
               color='#3178c6'
@@ -271,6 +285,7 @@ const ReviewBox = (props: {
         borderWidth: 2,
         borderColor: "black",
         padding: 10,
+        borderRadius: 10
       }}
     >
       <Text style={{ fontSize: 30, fontWeight: "bold" }}>
@@ -317,22 +332,23 @@ const ReviewBox = (props: {
         </Text>
       )}
       <View style={{ flexDirection: "row", alignSelf: "flex-end" }}>
-        <TouchableNativeFeedback
-          style={{
-            backgroundColor: disabled ? "#34495e" : "#e74c3c",
-            marginRight: 15,
-            paddingLeft: 10,
-          }}
-          disabled={disabled}
-          onPress={() => skip(itemIndex, note.id)}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text>Skip</Text>
-            {/* <Image source={require("../assets/icons/draw-check-mark.png")} /> */}
-            <Image source={require("../assets/icons/right-arrow.png")} />
-            {/* <Image source={require("../assets/icons/draw-check-mark.png")} /> */}
-          </View>
-        </TouchableNativeFeedback>
+        <View style={{ marginRight: 15 }}>
+          <TouchableNativeFeedback
+            style={{
+              backgroundColor: disabled ? "#34495e" : "#e74c3c",
+              paddingLeft: 10,
+            }}
+            disabled={disabled}
+            onPress={() => skip(itemIndex, note.id)}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ color: "#ededed" }}>Skip</Text>
+              {/* <Image source={require("../assets/icons/draw-check-mark.png")} /> */}
+              <Image source={require("../assets/icons/right-arrow.png")} />
+              {/* <Image source={require("../assets/icons/draw-check-mark.png")} /> */}
+            </View>
+          </TouchableNativeFeedback>
+        </View>
         <TouchableNativeFeedback
           disabled={disabled}
           onPress={() => markAsRevised(itemIndex, note.id)}

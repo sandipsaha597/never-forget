@@ -1,21 +1,12 @@
 import "react-native-gesture-handler";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {
-  Dimensions,
-  StatusBar,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  BackHandler,
-  Text,
-} from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Dimensions, StatusBar, StyleSheet, View } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import * as Font from "expo-font";
 import { AppLoading } from "expo";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 import Home from "./screens/Home";
 import AllNotes from "./screens/AllNotes";
 import {
@@ -31,6 +22,8 @@ import AddNote from "./screens/AddNote";
 import Animated, { Easing } from "react-native-reanimated";
 import Modal from "./widgets/Modal";
 import Settings from "./screens/Settings";
+import * as Notifications from "expo-notifications";
+import { add, differenceInSeconds, startOfDay } from "date-fns";
 
 const getFonts = () =>
   Font.loadAsync({
@@ -42,36 +35,45 @@ const getFonts = () =>
 export default function App() {
   const [fontLoaded, setFontLoaded] = useState(false);
 
-  if (fontLoaded) {
-    return (
-      <AppProvider>
+  // if (fontLoaded) {
+  return (
+    <AppProvider>
+      {fontLoaded ? (
         <Main />
-      </AppProvider>
-    );
-  } else {
-    return (
-      <View>
-        <AppLoading
-          startAsync={getFonts}
-          onFinish={() => setFontLoaded(true)}
-        />
-        {/* <Text>hello world!</Text> */}
-      </View>
-    );
-  }
+      ) : (
+        <View>
+          <AppLoading
+            startAsync={getFonts}
+            onFinish={() => setFontLoaded(true)}
+          />
+        </View>
+      )}
+    </AppProvider>
+  );
+  // } else {
+  //   return (
+  //     <View>
+  //       <AppLoading
+  //         startAsync={getFonts}
+  //         onFinish={() => setFontLoaded(true)}
+  //       />
+  //       {/* <Text>hello world!</Text> */}
+  //     </View>
+  //   );
+  // }
 }
 
-const rewardMsgs = [
-  "Well Done",
-  "Bravo",
-  "Keep up the good work",
-  "Awesome",
-  "Great",
-  "Hats off",
-  "Way to go",
-  "You rock",
-  "Nice going",
-  "Good job",
+export const rewardMsgs = [
+  "Well Done! 👍",
+  "Bravo! 🌟",
+  "Keep up the good work! 🔥",
+  "Awesome! 👍",
+  "Great! 🌟",
+  "Hats off! 👍",
+  "Way to go! 🚀",
+  "You rock! 🎸",
+  "Nice going! 🚶",
+  "Good job! 💼",
 ];
 // "Congrats",
 
@@ -82,13 +84,39 @@ const Main = () => {
     .current;
   const isAddNoteOpen = useRef(false);
   const {
-    states: { knowSpacedRepetition, allNotes },
+    states: { knowSpacedRepetition, allNotes, isAnyNoteActive },
     constants: { rewardMsgTimeoutTime },
   } = useContext<any>(AppContext);
 
   const Stack = createStackNavigator();
   const Tabs = createBottomTabNavigator();
-  const Drawer = createDrawerNavigator();
+
+  useEffect(() => {
+    if (!isAnyNoteActive) {
+      setTimeout(() => {
+        showAddNote(0);
+      }, 1000);
+    }
+  }, [knowSpacedRepetition]);
+
+  useEffect(() => {
+    if (isAnyNoteActive) {
+      Notifications.cancelScheduledNotificationAsync("SS-EmptyNoteBox");
+    } else {
+      const trigger = differenceInSeconds(
+        add(startOfDay(new Date()), { days: 1, hours: 6 }),
+        new Date()
+      );
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Your Note box is empty 📁",
+          body: "Add notes so you Never Forget what's important to you!",
+        },
+        identifier: "SS-EmptyNoteBox",
+        trigger: { seconds: trigger },
+      });
+    }
+  }, [isAnyNoteActive]);
 
   const showAddNote = (toValue: number, editNoteNumber?: number) => {
     isAddNoteOpen.current = !isAddNoteOpen.current;
@@ -189,10 +217,7 @@ const Main = () => {
             </View> */}
             {rewardMsgShow && (
               <Modal
-                text={
-                  rewardMsgs[Math.floor(Math.random() * rewardMsgs.length)] +
-                  "!"
-                }
+                text={rewardMsgs[Math.floor(Math.random() * rewardMsgs.length)]}
                 noChat
                 center
                 color='#3178c6'

@@ -1,5 +1,6 @@
 import React, { memo, useContext, useEffect, useRef, useState } from "react";
 import {
+  Button,
   Dimensions,
   Image,
   LayoutAnimation,
@@ -19,7 +20,8 @@ import {
   FontAwesome5,
   Ionicons,
 } from "@expo/vector-icons";
-import { format } from "date-fns";
+import { add, differenceInSeconds, format, startOfDay } from "date-fns";
+import * as Notifications from "expo-notifications";
 import { isAnyNoteActiveFunc, isRecycleBinEmptyFunc } from "../util/util";
 import Dropdown from "../widgets/Dropdown";
 import { schedulePushNotification } from "./AddNote";
@@ -67,6 +69,15 @@ export default function AllNotes(props: {
       }
     }
   };
+
+  // Empty Recycle bin
+  const deleteAll = () => {
+    let tempAllNotes = [...allNotes];
+    tempAllNotes = tempAllNotes.filter((v) => v.delete !== true);
+    setAllNotes(tempAllNotes);
+    isRecycleBinEmptyFunc(tempAllNotes, setIsRecycleBinEmpty);
+  };
+
   const editNote = (index: number) => {
     showAddNote && showAddNote(0, index);
     let tempAllNotes = [...allNotes];
@@ -100,6 +111,7 @@ export default function AllNotes(props: {
       tempAllNotes.forEach((v: any) => {
         v.show = true;
       });
+      subjectFilter(subjectFilterSelected);
     } else {
       tempAllNotes.forEach((v: any) => {
         if (v.title.toLowerCase().includes(val.toLowerCase())) {
@@ -134,14 +146,34 @@ export default function AllNotes(props: {
                 justifyContent: "space-between",
               }}
             >
-              <View style={{ marginLeft: 10 }}>
-                <Dropdown
-                  selected={subjectFilterSelected}
-                  title='Subject'
-                  options={subjectFilterOptions}
-                  setSelected={subjectFilter}
-                  // styles={{marginVertical: 0 }}
-                />
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View
+                  style={{ marginLeft: 10, position: "relative", zIndex: 1 }}
+                >
+                  <Dropdown
+                    selected={subjectFilterSelected}
+                    title='Subject'
+                    options={subjectFilterOptions}
+                    setSelected={subjectFilter}
+                    // styles={{marginVertical: 0 }}
+                  />
+                </View>
+                {recycleBin && (
+                  <View
+                    style={{
+                      marginLeft: 10,
+                      backgroundColor: "#d63031",
+                      borderRadius: 6,
+                    }}
+                  >
+                    <TouchableNativeFeedback
+                      style={{ paddingVertical: 10, paddingHorizontal: 15 }}
+                      onPress={deleteAll}
+                    >
+                      <Text>Delete All</Text>
+                    </TouchableNativeFeedback>
+                  </View>
+                )}
               </View>
               <View style={{ marginRight: 10 }}>
                 <TouchableNativeFeedback
@@ -166,6 +198,7 @@ export default function AllNotes(props: {
                 padding: 13,
                 flexDirection: "row",
                 alignItems: "center",
+                zIndex: 2
               }}
             >
               <TouchableNativeFeedback
@@ -280,6 +313,7 @@ const NoteBox = (props: {
         borderWidth: 2,
         borderColor: "black",
         padding: 10,
+        borderRadius: 10,
       }}
     >
       <Text style={{ fontSize: 30, fontWeight: "bold" }}>{note.title}</Text>
@@ -342,7 +376,13 @@ const NoteBox = (props: {
           {note.desc}
         </Text>
       )}
-      <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: 'center' }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
         {editNote ? (
           <TouchableNativeFeedback
             onPress={() => {
@@ -363,25 +403,32 @@ const NoteBox = (props: {
             }}
           >
             <Text style={{ color: "#fff", paddingRight: 6 }}>Restore</Text>
-            <Image style={ {height: 32, width: 32}} source={require("../assets/icons/file.png")} />
+            <Image
+              style={{ height: 32, width: 32 }}
+              source={require("../assets/icons/file.png")}
+            />
           </TouchableNativeFeedback>
         )}
-        <TouchableNativeFeedback
-          style={{ marginLeft: 10, alignSelf: "flex-end" }}
-          onPress={() => {
-            if (recycleBin) {
-              deleteNote(itemIndex, note.id, note, "permanentDelete");
-            } else {
-              deleteNote(itemIndex, note.id, note);
-            }
-          }}
-        >
-          {recycleBin ? (
-            <Image source={require("../assets/icons/delete.png")} />
-          ) : (
-            <Image source={require("../assets/icons/soft-delete.png")} />
-          )}
-        </TouchableNativeFeedback>
+        <View style={{ marginLeft: 10 }}>
+          <TouchableNativeFeedback
+            style={{ alignSelf: "flex-end" }}
+            onPress={() => {
+              if (recycleBin) {
+                deleteNote(itemIndex, note.id, note, "permanentDelete");
+              } else {
+                deleteNote(itemIndex, note.id, note);
+              }
+            }}
+          >
+            {recycleBin ? (
+              <Image source={require("../assets/icons/delete.png")} />
+            ) : (
+              <View style={{ width: 25 }}>
+                <Image source={require("../assets/icons/soft-delete.png")} />
+              </View>
+            )}
+          </TouchableNativeFeedback>
+        </View>
       </View>
     </View>
   );

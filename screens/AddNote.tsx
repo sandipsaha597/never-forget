@@ -15,24 +15,7 @@ import { add, differenceInSeconds, format, startOfDay } from "date-fns/esm";
 import { v4 as uuidv4 } from "uuid";
 import Modal from "../widgets/Modal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { isAnyNoteActiveFunc } from "../util/util";
 import * as Notifications from "expo-notifications";
-import { differenceInDays } from "date-fns";
-
-const chatObj = [
-  [
-    {
-      id: "8899854728",
-      text: "That's great!",
-      reply: "I know",
-    },
-    {
-      id: "7194853255",
-      text: "Thanks!",
-      reply: "You're welcome",
-    },
-  ],
-];
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -42,9 +25,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// console.log(differenceInSeconds(new Date(2020, 11, 8, 17, 27, 0, 0), new Date()))
-// console.log(differenceInSeconds(add(startOfDay(new Date()), {days: 1, hours: 6}), new Date()))
-// console.log(new Date())
 export default function AddNote(props: {
   isAddNoteOpen: any;
   value: any;
@@ -72,6 +52,31 @@ export default function AddNote(props: {
     constants: { mainColor },
   } = useContext<any>(AppContext);
   const [selected, setSelected] = useState(subs[0].title);
+
+  const chatObj = [
+    [
+      {
+        id: "8899854728",
+        text: "That's great!",
+        reply: "Thanks",
+        executeFunction: () => {
+          setTimeout(() => {
+            setFirstNote(false);
+          }, 3000);
+        },
+      },
+      {
+        id: "7194853255",
+        text: "Thanks!",
+        reply: "You're welcome",
+        executeFunction: () => {
+          setTimeout(() => {
+            setFirstNote(false);
+          }, 3000);
+        },
+      },
+    ],
+  ];
 
   useEffect(() => {
     setItem(setFirstNote, "firstNote");
@@ -110,11 +115,10 @@ export default function AddNote(props: {
     for (let i = 0; i < pattern.length; i++) {
       allRevisions.push(add(startOfDay(new Date()), { days: pattern[i] }));
     }
-    console.log(allRevisions);
 
     const tempAllNotes = [...allNotes];
 
-    // for (let i = 0; i < 1000; i++) {
+    // for (let i = 0; i < 10; i++) {
     const note = {
       id: uuidv4(),
       title: title,
@@ -137,17 +141,16 @@ export default function AddNote(props: {
     }, 10);
 
     schedulePushNotification(note, false, title);
+    // schedule no notes notification
 
     setTimeout(() => {
       setTitle("");
       setDesc("");
     }, 1000);
   };
-  console.log("=====================");
-  Notifications.getAllScheduledNotificationsAsync().then((v) => console.log(v));
+  // Notifications.getAllScheduledNotificationsAsync().then((v) => console.log(v));
 
   // Notifications.cancelAllScheduledNotificationsAsync()
-  // AsyncStorage.removeItem("firstNote");
   const setItem = async (toSet: any, itemName: string) => {
     const value = await AsyncStorage.getItem(itemName);
     if (value !== "false") {
@@ -159,8 +162,7 @@ export default function AddNote(props: {
 
   const editNote = () => {
     let tempAllNotes = [...allNotes];
-    console.log("editnote", tempAllNotes[editNoteNumber]);
-    const note = {...tempAllNotes[editNoteNumber]}
+    const note = { ...tempAllNotes[editNoteNumber] };
     if (note.title !== title) {
       schedulePushNotification(note, "edit", title);
     }
@@ -258,14 +260,22 @@ export default function AddNote(props: {
             multiline
             value={title}
           />
-          <Dropdown
-            title='Subject'
-            options={subs}
-            selected={selected}
-            setSelected={setSelected}
-            addInput
-            deleteAble
-          />
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Dropdown
+              title='Subject'
+              options={subs}
+              selected={selected}
+              setSelected={setSelected}
+              addInput
+              deleteAble
+            />
+            <View style={{ marginLeft: 10, opacity: 0.5, flex: 1 }}>
+              <Text>Pattern: 1-7-30-90-365</Text>
+              <Text style={{ color: "red" }}>
+                Custom pattern option coming soon
+              </Text>
+            </View>
+          </View>
           <TextInput
             style={{
               minHeight: 90,
@@ -281,7 +291,14 @@ export default function AddNote(props: {
             value={desc}
             maxLength={400}
           />
-          <Text style={{ textAlign: "right" }}>{desc.length}/400</Text>
+          <Text
+            style={{
+              textAlign: "right",
+              color: desc.length < 400 ? "#000" : "#27ae60",
+            }}
+          >
+            {desc.length}/400
+          </Text>
         </View>
       </ScrollView>
       {firstNote && (
@@ -301,16 +318,12 @@ export async function schedulePushNotification(
   title: string
 ) {
   for (let i = note.revisionNumber + 1; i < note.revisions.length; i++) {
-  // for (let i = note.revisionNumber + 1; i < note.revisionNumber + 2; i++) {
+    // for (let i = note.revisionNumber + 1; i < note.revisionNumber + 2; i++) {
     Notifications.getAllScheduledNotificationsAsync().then(
       (allNotifications) => {
         const revisionDate = new Date(note.revisions[i]);
         const notificationObj = allNotifications.find(
           (v) => v.identifier === format(revisionDate, "dd-MM-yyyy")
-        );
-        console.log(
-          "note======================================================================================",
-          note, title
         );
         let body = "raw";
         if (notificationObj) {
@@ -343,7 +356,6 @@ export async function schedulePushNotification(
                 ""
               );
             }
-            console.log("delete", body);
           } else if (type === "edit") {
             if (
               notificationObj?.content.body?.includes(
@@ -372,7 +384,7 @@ export async function schedulePushNotification(
                 "🗒️ " + note.title + " 📖",
                 "🗒️ " + title + " 📖"
               );
-            } 
+            }
           } else {
             body = "🗒️ " + title + " 📖" + "\n" + notificationObj.content.body;
           }
@@ -391,12 +403,12 @@ export async function schedulePushNotification(
               );
         Notifications.scheduleNotificationAsync({
           content: {
-            title: "Review your notes, so you Never Forget them! 📔",
+            title: i + "Review your notes, so you Never Forget them! 📔",
             body: body,
-            data: { data: "goes here" },
           },
           identifier: format(revisionDate, "dd-MM-yyyy"),
           trigger: { seconds: trigger },
+          // trigger: { seconds: 30 * i },
         });
       }
     );

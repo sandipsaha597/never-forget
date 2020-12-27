@@ -15,6 +15,7 @@ import * as Notifications from "expo-notifications";
 import { AppContext, EnumSpacedRepetition } from "../AppContext/AppContext";
 import AllNotes from "./AllNotes";
 import { add, differenceInSeconds, format } from "date-fns";
+import Dropdown from "../widgets/Dropdown";
 
 const { height } = Dimensions.get("window");
 
@@ -26,8 +27,8 @@ export default function Settings() {
     setRescheduleNotificationsProgress,
   ] = useState<any>(false);
   const {
-    states: { allNotes, isAnyNoteActive, subs },
-    actions: { setKnowSpacedRepetition, setIsAnyNoteActive },
+    states: { animations },
+    actions: { setKnowSpacedRepetition, setAnimations },
   } = useContext<any>(AppContext);
 
   const onShare = async () => {
@@ -37,11 +38,8 @@ export default function Settings() {
           "Never Forger | Never Forget what you studied using spaced repetition technique",
       });
       if (result.action === Share.sharedAction) {
-        console.log("0", result);
         if (result.activityType) {
           // shared with activity type of result.activityType
-          console.log("1.1", result.activityType);
-          console.log("1.2", result.action);
         } else {
           // shared
           setTimeout(() => {
@@ -53,7 +51,6 @@ export default function Settings() {
         }
       } else if (result.action === Share.dismissedAction) {
         // dismissed
-        console.log("3 dismissed");
       }
     } catch (error) {
       alert(error.message);
@@ -82,6 +79,12 @@ export default function Settings() {
           }}
         />
         <Box
+          heading='Turn On/Off Animations'
+          desc="Animations might cause some UI(User Interface: the thing you are looking at) issues in some devices. Turning it off will resolve those issues. It won't disable all the animations."
+          onPress={setAnimations}
+          boxInfo={{ animations: animations }}
+        />
+        <Box
           heading='Backup'
           desc='Backup your data on google drive or in downloadable CSV or both. So you can switch device and still have your notes and data.'
           comingSoon
@@ -98,7 +101,7 @@ export default function Settings() {
         />
         <Box
           heading='Recycle Bin'
-          desc='Your deleted notes from All Notes will appear here. You can delete them permanently from here.'
+          desc='Your deleted notes from All Notes will appear here. You can delete them permanently or restore from here.'
           onPress={(val: string) => {
             LayoutAnimation.configureNext(
               LayoutAnimation.Presets.easeInEaseOut
@@ -112,9 +115,10 @@ export default function Settings() {
             setKnowSpacedRepetition(EnumSpacedRepetition.No)
           }
         />
+        {/* Share with 2 people and get 2 months ad free. We won't really track whether you shared our app or not, we'll just trust your words. */}
         <Box
           heading='Share'
-          desc="Share if you like our app. Share with 2 people and get 2 months ad free. We won't really track whether you shared our app or not, we'll just trust your words."
+          desc='Share if you like our app.'
           onPress={onShare}
           shared={shared}
           setShared={(val) => {
@@ -264,6 +268,7 @@ const Box = (props: iBox) => {
     highlight,
     shared,
     setShared,
+    boxInfo,
   } = props;
   return (
     <View
@@ -274,7 +279,7 @@ const Box = (props: iBox) => {
     >
       <TouchableNativeFeedback
         disabled={comingSoon}
-        onPress={() => onPress(heading)}
+        onPress={() => heading !== "Turn On/Off Animations" && onPress(heading)}
         style={{
           opacity: comingSoon ? 0.5 : 1,
           paddingHorizontal: 20,
@@ -288,9 +293,22 @@ const Box = (props: iBox) => {
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 20, color: highlight ? "#fff" : "#000" }}>
-            {heading}
-          </Text>
+          <View>
+            <Text style={{ fontSize: 20, color: highlight ? "#fff" : "#000" }}>
+              {heading}
+            </Text>
+            {heading === "Turn On/Off Animations" && (
+              <Dropdown
+                title='Animations'
+                options={[
+                  { id: "3418704314", title: "On" },
+                  { id: "3849189021", title: "Off" },
+                ]}
+                selected={boxInfo?.animations}
+                setSelected={(val) => onPress(val)}
+              />
+            )}
+          </View>
           {heading === "Reminder Time" && (
             <Text style={{ fontSize: 20 }}>6:00 am</Text>
           )}
@@ -307,7 +325,7 @@ const Box = (props: iBox) => {
         )}
         {comingSoon && <Text style={{ color: "red" }}>coming soon</Text>}
       </TouchableNativeFeedback>
-      {heading === "Share" && shared === "I shared" ? (
+      {/* {heading === "Share" && shared === "I shared" ? (
         <Button
           title='I shared'
           onPress={() => setShared && setShared("I didn't shared")}
@@ -325,7 +343,7 @@ const Box = (props: iBox) => {
         </>
       ) : (
         false
-      )}
+      )} */}
     </View>
   );
 };
@@ -460,39 +478,41 @@ const PrivacyPolicy = () => {
 const rescheduleNotifications = (setRescheduleNotificationsProgress: any) => {
   Notifications.getAllScheduledNotificationsAsync().then((allNotifications) => {
     const allNotificationsLength = allNotifications.length;
-    allNotifications.forEach((v, i) => {
-      const body = v.content.body;
-      const revisionDate = () => {
-        let dateArray = v.identifier.split("-");
-        return new Date(
-          parseInt(dateArray[2]),
-          parseInt(dateArray[1]) - 1,
-          parseInt(dateArray[0])
+    allNotifications.forEach(async (v, i) => {
+      if (!v.identifier.startsWith("SS")) {
+        const body = v.content.body;
+        const revisionDate = () => {
+          let dateArray = v.identifier.split("-");
+          return new Date(
+            parseInt(dateArray[2]),
+            parseInt(dateArray[1]) - 1,
+            parseInt(dateArray[0])
+          );
+        };
+        const trigger = differenceInSeconds(
+          // add(startOfDay(new Date()), { days: 0, hours: 13, minutes: 11 }),
+          // add(new Date(note.revisions[0]), { hours: 14, minutes: 18 }),
+          add(revisionDate(), { hours: 6 }),
+          new Date()
         );
-      };
-      const trigger = differenceInSeconds(
-        // add(startOfDay(new Date()), { days: 0, hours: 13, minutes: 11 }),
-        // add(new Date(note.revisions[0]), { hours: 14, minutes: 18 }),
-        add(revisionDate(), { hours: 6 }),
-        new Date()
-      );
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Review your notes, so you Never Forget them! 📔",
-          body: body ?? "Something went wrong",
-          data: { data: "goes here" },
-        },
-        identifier: format(revisionDate(), "dd-MM-yyyy"),
-        trigger: { seconds: trigger },
-      });
-
-      if (i + 1 >= allNotificationsLength) {
-        setRescheduleNotificationsProgress(false);
-      } else {
-        setRescheduleNotificationsProgress({
-          index: i + 1,
-          length: allNotificationsLength,
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Review your notes, so you Never Forget them! 📔",
+            body: body ?? "Something went wrong",
+            data: { data: "goes here" },
+          },
+          identifier: format(revisionDate(), "dd-MM-yyyy"),
+          trigger: { seconds: trigger },
         });
+
+        if (i + 1 >= allNotificationsLength) {
+          setRescheduleNotificationsProgress(false);
+        } else {
+          setRescheduleNotificationsProgress({
+            index: i + 1,
+            length: allNotificationsLength,
+          });
+        }
       }
     });
   });
@@ -509,4 +529,6 @@ interface iBox {
 
   shared?: string;
   setShared?: (val: string) => void;
+
+  boxInfo?: any;
 }
