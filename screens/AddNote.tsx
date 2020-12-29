@@ -243,7 +243,7 @@ export default function AddNote(props: {
           }}
         >
           <Text style={[styles.headingText, { color: "white", marginTop: 0 }]}>
-            {editNoteNumber !== -1 ? "Note Edit" : "What you learned today?"}
+            {editNoteNumber !== -1 ? "Edit Note" : "What you learned today?"}
           </Text>
           <TextInput
             style={{

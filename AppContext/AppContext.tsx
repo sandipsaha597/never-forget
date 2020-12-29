@@ -135,7 +135,7 @@ export function AppProvider(props: any) {
           console.log("err", err);
         }
       },
-      async setAnimations(val: boolean) {
+      async setAnimations(val: 'On' | 'Off') {
         try {
           await AsyncStorage.setItem("animations", JSON.stringify(val));
           setAnimations(val);

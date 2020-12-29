@@ -1,8 +1,6 @@
-import { createStackNavigator } from "@react-navigation/stack";
 import { add, format } from "date-fns";
 import React, { useContext, useState } from "react";
 import { Button, Dimensions, Text, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import WebView from "react-native-webview";
 import { styles } from "../../App";
 import { AppContext, EnumSpacedRepetition } from "../../AppContext/AppContext";
@@ -104,8 +102,8 @@ So did you understand what spaced repetition is? It's crucial to use this app co
             text: "No",
             reply:
               "Please try searching for 'Forgetting curve', 'spaced repetition' and/or 'spacing effect'. Done? So did you\
-understand what spaced repetition is? It's crucial to use this\
-app correctly.",
+ understand what spaced repetition is? It's crucial to use this\
+ app correctly.",
             indent: [
               {
                 id: "9284719402",

@@ -20,10 +20,9 @@
       "**/*"
     ],
     "android": {
+      "package": "com.neverforget.neverforget",
+      "versionCode": 1,
       "useNextNotificationsApi": true,
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"  
-      }
     },
     "ios": {
       "supportsTablet": true

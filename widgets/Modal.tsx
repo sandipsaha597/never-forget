@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { id } from "date-fns/esm/locale";
 import React, {
   useCallback,
   useContext,
@@ -8,23 +7,16 @@ import React, {
   useState,
 } from "react";
 import {
-  NativeModules,
   LayoutAnimation,
   Text,
   View,
   Dimensions,
   Linking,
   Alert,
-  Button,
 } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import Animated, { Easing } from "react-native-reanimated";
 import { AppContext } from "../AppContext/AppContext";
-
-const { UIManager } = NativeModules;
-
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
 
 export default function Modal(props: {
   text: string;
@@ -160,7 +152,7 @@ export default function Modal(props: {
       >
         <View
           style={{
-            backgroundColor: color ? color : "#E0E0E0",
+            backgroundColor: color ? color : "#2b2b2b",
             // marginTop: 10,
             padding: 10,
             marginRight: 10,
@@ -170,7 +162,7 @@ export default function Modal(props: {
         >
           {text.startsWith("custom") ? (
             text.includes("===the guy above===") ? (
-              <Text>
+              <Text style={{ color: "#fff" }}>
                 The Guy above isn't me. His name is Matty. Their youtube
                 channel:
                 <OpenURLButton
@@ -178,21 +170,23 @@ export default function Modal(props: {
                     "https://www.youtube.com/channel/UCBX_-ls-dXuhFNSWSXcHrTA"
                   }
                 >
-                  Matt &amp; Matty
+                  <Text style={{ color: "#fff" }}>Matt &amp; Matty</Text>
                 </OpenURLButton>
                 {"\n \n"}
                 The YouTube video link: {"\n"}
                 <OpenURLButton
                   url={"https://www.youtube.com/watch?v=VkPlQ4gjk8M"}
                 >
-                  https://www.youtube.com/watch?v={"\n"}VkPlQ4gjk8M
+                  <Text style={{ color: "#fff" }}>
+                    https://www.youtube.com/watch?v={"\n"}VkPlQ4gjk8M
+                  </Text>
                 </OpenURLButton>
                 {"\n \n"}They explained spaced repetition very well. So did you
                 understand what spaced repetition is? It's crucial to use this
                 app correctly.
               </Text>
             ) : text.includes("===the guy above hindi===") ? (
-              <Text>
+              <Text style={{ color: "#fff" }}>
                 The Guy above isn't me. His name is Amit Kakkar. His youtube
                 channel:
                 <OpenURLButton
@@ -200,23 +194,25 @@ export default function Modal(props: {
                     "https://www.youtube.com/channel/UCClj0UjhdYaR-WR-RHBVOww"
                   }
                 >
-                  AMIT KAKKAR SPEAKS
+                  <Text style={{ color: "#fff" }}>AMIT KAKKAR SPEAKS</Text>
                 </OpenURLButton>
                 {"\n \n"}
                 The YouTube video link: {"\n"}
                 <OpenURLButton
                   url={"https://www.youtube.com/watch?v=OccJMq7AtSE"}
                 >
-                  https://www.youtube.com/watch?v={"\n"}OccJMq7AtSE
+                  <Text style={{ color: "#fff" }}>
+                    https://www.youtube.com/watch?v={"\n"}OccJMq7AtSE
+                  </Text>
                 </OpenURLButton>
                 {"\n"}
-                <Text>
-                  He's a physics gold medalist, b.tech gold medalist, M.S. IIT
-                  delhi - gold medalist
-                </Text>
-                {"\n \n"}He explained spaced repetition very well. So did you
-                understand what spaced repetition is? It's crucial to use this
-                app correctly.
+                {"\n"}
+                He's a physics - gold medalist, B.tech - gold medalist, M.S. IIT
+                delhi - gold medalist
+                {"\n \n"}
+                He explained spaced repetition very well. So did you understand
+                what spaced repetition is? It's crucial to use this app
+                correctly.
               </Text>
             ) : null
           ) : (
@@ -238,7 +234,7 @@ export default function Modal(props: {
                   flexDirection: "row",
                   flexWrap: "wrap",
                   justifyContent: isReply ? "flex-end" : "flex-start",
-                  maxWidth: isReply ? '100%' : '93%'
+                  maxWidth: isReply ? "100%" : "93%",
                 }}
               >
                 {v.map((j: any, i2: number) => (
@@ -249,7 +245,7 @@ export default function Modal(props: {
                       isReply && i1 === chat.length - 1 ? reply(j, i1, i2) : {}
                     }
                     style={{
-                      backgroundColor: isReply ? "#3178c6" : "#E0E0E0",
+                      backgroundColor: isReply ? "#3178c6" : "#2b2b2b",
                       padding: 10,
                       marginTop: 10,
 
@@ -257,7 +253,7 @@ export default function Modal(props: {
                       borderRadius: 4,
                     }}
                   >
-                    <Text style={{ color: isReply ? "#ededed" : "#000" }}>
+                    <Text style={{ color: isReply ? "#ededed" : "#fff" }}>
                       {j.text}
                     </Text>
                   </TouchableOpacity>

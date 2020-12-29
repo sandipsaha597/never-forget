@@ -27,8 +27,6 @@ import { add, differenceInSeconds, startOfDay } from "date-fns";
 
 const getFonts = () =>
   Font.loadAsync({
-    "roboto-regular": require("./assets/fonts/Roboto-Regular.ttf"),
-    "roboto-bold": require("./assets/fonts/Roboto-Bold.ttf"),
     "staatliches-regular": require("./assets/fonts/Staatliches-Regular.ttf"),
   });
 
@@ -257,3 +255,7 @@ export const styles = StyleSheet.create({
     fontFamily: "staatliches-regular",
   },
 });
+
+// "config": {
+//   "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
+// }

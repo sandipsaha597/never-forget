@@ -1,8 +1,6 @@
 import React, { useState, useRef, useContext } from "react";
 import {
   LayoutAnimation,
-  NativeModules,
-  Platform,
   Text,
   View,
 } from "react-native";
@@ -15,9 +13,6 @@ import Animated, { Easing } from "react-native-reanimated";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { AppContext } from "../AppContext/AppContext";
 import { v4 as uuidV4 } from "uuid";
-
-// UIManager.setLayoutAnimationEnabledExperimental &&
-//   UIManager.setLayoutAnimationEnabledExperimental(true);
 
 export default function Dropdown(props: {
   title: string;

@@ -36,7 +36,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const date = { active: false, days: 0, hours: 0 };
+const date = { active: false, days: 1, hours: 0 };
 
 // "Congrats",
 

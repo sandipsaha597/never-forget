@@ -1,6 +1,5 @@
-import React, { memo, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import {
-  Button,
   Dimensions,
   Image,
   LayoutAnimation,
@@ -14,14 +13,8 @@ import {
   FlatList,
   TouchableNativeFeedback,
 } from "react-native-gesture-handler";
-import {
-  AntDesign,
-  FontAwesome,
-  FontAwesome5,
-  Ionicons,
-} from "@expo/vector-icons";
-import { add, differenceInSeconds, format, startOfDay } from "date-fns";
-import * as Notifications from "expo-notifications";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { format } from "date-fns";
 import { isAnyNoteActiveFunc, isRecycleBinEmptyFunc } from "../util/util";
 import Dropdown from "../widgets/Dropdown";
 import { schedulePushNotification } from "./AddNote";
@@ -170,7 +163,7 @@ export default function AllNotes(props: {
                       style={{ paddingVertical: 10, paddingHorizontal: 15 }}
                       onPress={deleteAll}
                     >
-                      <Text>Delete All</Text>
+                      <Text style={{ color: "#fff" }}>Delete All</Text>
                     </TouchableNativeFeedback>
                   </View>
                 )}
@@ -198,7 +191,7 @@ export default function AllNotes(props: {
                 padding: 13,
                 flexDirection: "row",
                 alignItems: "center",
-                zIndex: 2
+                zIndex: 2,
               }}
             >
               <TouchableNativeFeedback
