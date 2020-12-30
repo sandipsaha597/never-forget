@@ -101,17 +101,24 @@ const Main = () => {
     if (isAnyNoteActive) {
       Notifications.cancelScheduledNotificationAsync("SS-EmptyNoteBox");
     } else {
-      const trigger = differenceInSeconds(
-        add(startOfDay(new Date()), { days: 1, hours: 6 }),
-        new Date()
-      );
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Your Note box is empty 📁",
-          body: "Add notes so you Never Forget what's important to you!",
-        },
-        identifier: "SS-EmptyNoteBox",
-        trigger: { seconds: trigger },
+      Notifications.getAllScheduledNotificationsAsync().then((v) => {
+        const notificationExist = v.find((v2) =>
+          v2.identifier.startsWith("SS-")
+        );
+        if (!notificationExist) {
+          const trigger = differenceInSeconds(
+            add(startOfDay(new Date()), { days: 1, hours: 6 }),
+            new Date()
+          );
+          Notifications.scheduleNotificationAsync({
+            content: {
+              title: "Your Note box is empty 📁",
+              body: "Add notes so you Never Forget what's important to you!",
+            },
+            identifier: "SS-EmptyNoteBox",
+            trigger: { seconds: trigger },
+          });
+        }
       });
     }
   }, [isAnyNoteActive]);

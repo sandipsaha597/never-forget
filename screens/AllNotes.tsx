@@ -271,7 +271,7 @@ const NoNotes = (props: { source?: any; text?: string }) => {
   return (
     <View
       style={{
-        height: Dimensions.get("window").height - 80,
+        flex: 1,
         backgroundColor: "#fff",
         justifyContent: "center",
         alignItems: "center",
