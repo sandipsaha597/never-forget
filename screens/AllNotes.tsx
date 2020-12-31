@@ -115,6 +115,9 @@ export default function AllNotes(props: {
       });
     }
     setAllNotes(tempAllNotes, false);
+    LayoutAnimation.configureNext(
+      LayoutAnimation.Presets.easeInEaseOut
+    );
     setSearchText(val);
   };
 

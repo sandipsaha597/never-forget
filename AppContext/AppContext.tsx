@@ -213,10 +213,10 @@ export function AppProvider(props: any) {
   };
   useEffect(() => {
     setItem(setAllNotes, "allNotes");
+    retrieveAllNotesDeleteAndRecycleBinStatus();
     setItem(setKnowSpacedRepetition, "knowSpacedRepetition");
     setItem(setSubs, "subs");
     setItem(setAnimations, "animations");
-    retrieveAllNotesDeleteAndRecycleBinStatus();
   }, []);
 
   useEffect(() => {

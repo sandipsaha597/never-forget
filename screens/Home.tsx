@@ -1,14 +1,13 @@
-import { differenceInDays, isFuture, sub } from "date-fns";
-import React, { useContext, useEffect, useRef, useState } from "react";
 import {
-  Dimensions,
-  Image,
-  NativeModules,
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+  add,
+  differenceInDays,
+  differenceInSeconds,
+  isFuture,
+  startOfDay,
+  sub,
+} from "date-fns";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
 import {
   FlatList,
   TouchableNativeFeedback,
@@ -21,7 +20,6 @@ import Modal from "../widgets/Modal";
 import { AdMobInterstitial, AdMobRewarded } from "expo-ads-admob";
 import { rewardMsgs } from "../App";
 
-const { UIManager } = NativeModules;
 const congratsIcons = [
   require("../assets/icons/fire-cracker256.png"),
   require("../assets/icons/fireworks.png"),
@@ -29,14 +27,7 @@ const congratsIcons = [
   require("../assets/icons/clapping.png"),
 ];
 
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-const date = { active: false, days: 0, hours: 0 };
+const date = { active: false, days: 1, hours: 0 };
 
 // "Congrats",
 
@@ -60,18 +51,7 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
 
   useEffect(() => {
     // LayoutAnimation.easeInEaseOut();
-    const haveNotesToRevise = allNotes.find((v: any) => {
-      return (
-        !v.delete &&
-        !isFuture(
-          sub(new Date(v.revisions[v.revisionNumber + 1]), {
-            days: date.days,
-            hours: date.hours,
-          })
-        )
-      );
-    });
-    setNotesToRevise(!!haveNotesToRevise);
+    setNotesToRevise(!!haveNotesToRevise(allNotes));
   }, [allNotes]);
 
   useEffect(() => {
@@ -147,6 +127,22 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
   useEffect(() => {
     // showAd();
     // showAd2();
+    const refreshFunc = () => {
+      const refreshTime = differenceInSeconds(
+        add(startOfDay(new Date()), { days: 1 }),
+        new Date()
+      );
+      if (refreshTime > 10000) {
+        setTimeout(() => {
+          refreshFunc();
+        }, 10000);
+      } else {
+        setTimeout(() => {
+          setNotesToRevise(!!haveNotesToRevise(allNotes));
+        }, refreshTime * 1000);
+      }
+    };
+    refreshFunc();
   }, []);
 
   return (
@@ -285,12 +281,10 @@ const ReviewBox = (props: {
         borderWidth: 2,
         borderColor: "black",
         padding: 10,
-        borderRadius: 10
+        borderRadius: 10,
       }}
     >
-      <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-        {itemIndex} {note.title}
-      </Text>
+      <Text style={{ fontSize: 30, fontWeight: "bold" }}>{note.title}</Text>
       {differenceInDaysConst > 0 ? (
         <Text
           style={{
@@ -360,3 +354,16 @@ const ReviewBox = (props: {
     </View>
   );
 };
+
+const haveNotesToRevise = (allNotes: any) =>
+  allNotes.find((v: any) => {
+    return (
+      !v.delete &&
+      !isFuture(
+        sub(new Date(v.revisions[v.revisionNumber + 1]), {
+          days: date.days,
+          hours: date.hours,
+        })
+      )
+    );
+  });

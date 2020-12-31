@@ -90,7 +90,7 @@ const Main = () => {
   const Tabs = createBottomTabNavigator();
 
   useEffect(() => {
-    if (!isAnyNoteActive) {
+    if (!isAnyNoteActive && isAnyNoteActive !== null) {
       setTimeout(() => {
         showAddNote(0);
       }, 1000);
