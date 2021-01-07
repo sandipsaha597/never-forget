@@ -27,7 +27,7 @@ const congratsIcons = [
   require("../assets/icons/clapping.png"),
 ];
 
-const date = { active: false, days: 1, hours: 0 };
+const date = { active: false, days: 0, hours: 0 };
 
 // "Congrats",
 
@@ -128,21 +128,23 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
     // showAd();
     // showAd2();
     const refreshFunc = () => {
-      const refreshTime = differenceInSeconds(
-        add(startOfDay(new Date()), { days: 1 }),
-        new Date()
-      );
-      if (refreshTime > 10000) {
+      const refreshTime =
+        differenceInSeconds(
+          add(startOfDay(new Date()), { days: 0, hours: 12 }),
+          new Date()
+        ) * 1000;
+      if (refreshTime > 1000 * 60) {
         setTimeout(() => {
           refreshFunc();
-        }, 10000);
+        }, 1000 * 60);
       } else {
         setTimeout(() => {
+          console.log("refresh Home");
           setNotesToRevise(!!haveNotesToRevise(allNotes));
-        }, refreshTime * 1000);
+        }, refreshTime);
       }
     };
-    refreshFunc();
+    refreshFunc()
   }, []);
 
   return (

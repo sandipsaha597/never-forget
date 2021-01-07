@@ -14,7 +14,7 @@ import {
   TouchableNativeFeedback,
 } from "react-native-gesture-handler";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { format } from "date-fns";
+import { format, sub } from "date-fns";
 import { isAnyNoteActiveFunc, isRecycleBinEmptyFunc } from "../util/util";
 import Dropdown from "../widgets/Dropdown";
 import { schedulePushNotification } from "./AddNote";
@@ -107,7 +107,11 @@ export default function AllNotes(props: {
       subjectFilter(subjectFilterSelected);
     } else {
       tempAllNotes.forEach((v: any) => {
-        if (v.title.toLowerCase().includes(val.toLowerCase())) {
+        if (
+          v.title.toLowerCase().includes(val.toLowerCase()) &&
+          (subjectFilterSelected === "All" ||
+            v.subject === subjectFilterSelected)
+        ) {
           v.show = true;
         } else {
           v.show = false;
@@ -115,10 +119,37 @@ export default function AllNotes(props: {
       });
     }
     setAllNotes(tempAllNotes, false);
-    LayoutAnimation.configureNext(
-      LayoutAnimation.Presets.easeInEaseOut
-    );
     setSearchText(val);
+  };
+
+  const filter = (val: any) => {
+    console.log("val", val);
+    const tempAllNotes: any = [...allNotes];
+    if (
+      val.subject === "All" &&
+      (val.searchText === "" || val.searchText === false)
+      ) {
+        tempAllNotes.forEach((v: any) => {
+          v.show = true;
+        });
+      } else {
+        tempAllNotes.forEach((v: any) => {
+          const searchText = val.searchText
+          ? v.title.toLowerCase().includes(val.searchText.toLowerCase())
+          : true;
+          if (
+            searchText &&
+            (val.subject === "All" || v.subject === val.subject)
+            ) {
+          v.show = true;
+        } else {
+          v.show = false;
+        }
+      });
+    }
+    setAllNotes(tempAllNotes, false);
+    setSubjectFilterSelected(val.subject);
+    setSearchText(val.searchText);
   };
 
   return (
@@ -150,8 +181,9 @@ export default function AllNotes(props: {
                     selected={subjectFilterSelected}
                     title='Subject'
                     options={subjectFilterOptions}
-                    setSelected={subjectFilter}
-                    // styles={{marginVertical: 0 }}
+                    setSelected={(val) =>
+                      filter({ subject: val, searchText: searchText })
+                    }
                   />
                 </View>
                 {recycleBin && (
@@ -200,7 +232,12 @@ export default function AllNotes(props: {
               <TouchableNativeFeedback
                 onPress={() => {
                   TextInputRef.current.blur();
-                  searchFilter(false);
+                  LayoutAnimation.configureNext(
+                    LayoutAnimation.Presets.easeInEaseOut
+                  );
+
+                  filter({ subject: subjectFilterSelected, searchText: false });
+                  // searchFilter(false);
                 }}
               >
                 <AntDesign name='arrowleft' size={24} color='black' />
@@ -210,7 +247,7 @@ export default function AllNotes(props: {
                 placeholder='Search...'
                 underlineColorAndroid='#3178c6'
                 value={searchText ? searchText : ""}
-                onChangeText={(val) => searchFilter(val)}
+                onChangeText={(val) => filter({subject: subjectFilterSelected, searchText: val})}
                 style={{ marginLeft: 10, width: "80%" }}
               />
             </View>
