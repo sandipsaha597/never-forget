@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import FilesystemStorage from "@react-native-async-storage/async-storage";
 import { cancelAllScheduledNotificationsAsync } from "expo-notifications";
 import React, { useState, createContext, useEffect, useRef } from "react";
 import { LayoutAnimation, NativeModules, Platform } from "react-native";
@@ -65,13 +65,15 @@ export function AppProvider(props: any) {
   ]);
 
   const testFunc = async () => {
-    FilesystemStorage.setItem("testing", { name: "sam" });
+    FilesystemStorage.setItem("testing", JSON.stringify({ name: "sam" }));
     FilesystemStorage.getItem("testing")
       .then((res) => console.log("res", res))
       .catch((err) => console.log("err", err));
   };
 
-  // useEffect(() => {testFunc()}, []);
+  // useEffect(() => {
+  //   testFunc();
+  // }, []);
 
   // refs
 
@@ -93,7 +95,7 @@ export function AppProvider(props: any) {
       async setAllNotes(values: IAllNotes[], save: boolean = true) {
         try {
           if (save) {
-            await AsyncStorage.setItem("allNotes", JSON.stringify(values));
+            await FilesystemStorage.setItem("allNotes", JSON.stringify(values));
           }
           animations === "On" &&
             LayoutAnimation.configureNext(
@@ -107,7 +109,7 @@ export function AppProvider(props: any) {
       },
       async setSubs(values: { id: string; title: string }[]) {
         try {
-          await AsyncStorage.setItem("subs", JSON.stringify(values));
+          await FilesystemStorage.setItem("subs", JSON.stringify(values));
           LayoutAnimation.easeInEaseOut();
           setSubs(values);
         } catch (err) {
@@ -136,7 +138,7 @@ export function AppProvider(props: any) {
     //   .catch((err) => alert(err));
 
     try {
-      await FilesystemStorage.setItem(save, value);
+      await FilesystemStorage.setItem(save, JSON.stringify(value));
       update(value);
     } catch (err) {
       alert(err);
@@ -146,24 +148,24 @@ export function AppProvider(props: any) {
     //   .then((res) => console.log("res", res))
     //   .catch((err) => console.log("err", err));
     // try {
-    //   await AsyncStorage.setItem(save, JSON.stringify(value));
+    //   await FilesystemStorage.setItem(save, JSON.stringify(value));
     //   update(value);
     // } catch (err) {
     //   alert(err);
     //   console.log("err", err);
     // }
   };
-  // AsyncStorage.removeItem('knowSpacedRepetition')
-  // AsyncStorage.removeItem("firstNote");
-  // AsyncStorage.removeItem("allNotes");
-  // AsyncStorage.removeItem("isAnyNoteActive");
-  // AsyncStorage.removeItem("isRecycleBinEmpty");
+  // FilesystemStorage.removeItem('knowSpacedRepetition')
+  // FilesystemStorage.removeItem("firstNote");
+  // FilesystemStorage.removeItem("allNotes");
+  // FilesystemStorage.removeItem("isAnyNoteActive");
+  // FilesystemStorage.removeItem("isRecycleBinEmpty");
   // cancelAllScheduledNotificationsAsync();
-  // AsyncStorage.removeItem('subs')
-  // AsyncStorage.removeItem('animations')
+  // FilesystemStorage.removeItem('subs')
+  // FilesystemStorage.removeItem('animations')
 
   const setItem = async (toSet: any, itemName: string) => {
-    const value = await AsyncStorage.getItem(itemName);
+    const value = await FilesystemStorage.getItem(itemName);
     if (value) {
       if (itemName === "allNotes") {
         const tempValue = JSON.parse(value);
@@ -179,7 +181,7 @@ export function AppProvider(props: any) {
 
   const retrieveAllNotesDeleteAndRecycleBinStatus = async () => {
     if (isAnyNoteActive === null) {
-      const storedIsAnyNoteActive = await AsyncStorage.getItem(
+      const storedIsAnyNoteActive = await FilesystemStorage.getItem(
         "isAnyNoteActive"
       );
       if (
@@ -193,7 +195,7 @@ export function AppProvider(props: any) {
     }
 
     if (isRecycleBinEmpty === null) {
-      const storedIsRecycleBinEmpty = await AsyncStorage.getItem(
+      const storedIsRecycleBinEmpty = await FilesystemStorage.getItem(
         "isRecycleBinEmpty"
       );
       if (

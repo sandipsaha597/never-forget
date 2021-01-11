@@ -120,7 +120,7 @@ export default function AddNote(props: {
 
     const tempAllNotes = [...allNotes];
 
-    // for (let i = 0; i < 10; i++) {
+    // for (let i = 0; i < 10000; i++) {
     const note = {
       id: uuidv4(),
       title: title,
@@ -143,7 +143,6 @@ export default function AddNote(props: {
     }, 10);
 
     schedulePushNotification(note, false, title);
-    // schedule no notes notification
 
     setTimeout(() => {
       setTitle("");
