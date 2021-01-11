@@ -1,5 +1,4 @@
 import * as FileSystem from "expo-file-system";
-console.log(FileSystem.documentDirectory);
 let options = {
   storagePath: `${FileSystem.documentDirectory}database`,
   toFileName: (name) => name.split(":").join("-"),

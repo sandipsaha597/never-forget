@@ -123,7 +123,6 @@ export default function AllNotes(props: {
   };
 
   const filter = (val: any) => {
-    console.log("val", val);
     const tempAllNotes: any = [...allNotes];
     if (
       val.subject === "All" &&
