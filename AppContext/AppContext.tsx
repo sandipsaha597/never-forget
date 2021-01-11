@@ -3,6 +3,7 @@ import { cancelAllScheduledNotificationsAsync } from "expo-notifications";
 import React, { useState, createContext, useEffect, useRef } from "react";
 import { LayoutAnimation, NativeModules, Platform } from "react-native";
 import { v4 as uuidV4 } from "uuid";
+import FilesystemStorage from "../FilesystemStorage";
 import { isAnyNoteActiveFunc, isRecycleBinEmptyFunc } from "../util/util";
 
 export const AppContext = createContext();
@@ -63,6 +64,15 @@ export function AppProvider(props: any) {
     },
   ]);
 
+  const testFunc = async () => {
+    FilesystemStorage.setItem("testing", { name: "sam" });
+    FilesystemStorage.getItem("testing")
+      .then((res) => console.log("res", res))
+      .catch((err) => console.log("err", err));
+  };
+
+  // useEffect(() => {testFunc()}, []);
+
   // refs
 
   const contextValue = {
@@ -95,18 +105,6 @@ export function AppProvider(props: any) {
           console.log("err", err);
         }
       },
-      async setKnowSpacedRepetition(values: EnumSpacedRepetition) {
-        try {
-          await AsyncStorage.setItem(
-            "knowSpacedRepetition",
-            JSON.stringify(values)
-          );
-          setKnowSpacedRepetition(values);
-        } catch (err) {
-          alert(err);
-          console.log("err", err);
-        }
-      },
       async setSubs(values: { id: string; title: string }[]) {
         try {
           await AsyncStorage.setItem("subs", JSON.stringify(values));
@@ -117,34 +115,43 @@ export function AppProvider(props: any) {
           console.log("err", err);
         }
       },
-      async setIsAnyNoteActive(val: boolean) {
-        try {
-          await AsyncStorage.setItem("isAnyNoteActive", JSON.stringify(val));
-          setIsAnyNoteActive(val);
-        } catch (err) {
-          alert(err);
-          console.log("err", err);
-        }
+      setKnowSpacedRepetition(val: EnumSpacedRepetition) {
+        saveAndUpdate("knowSpacedRepetition", setKnowSpacedRepetition, val);
       },
-      async setIsRecycleBinEmpty(val: boolean) {
-        try {
-          await AsyncStorage.setItem("isRecycleBinEmpty", JSON.stringify(val));
-          setIsRecycleBinEmpty(val);
-        } catch (err) {
-          alert(err);
-          console.log("err", err);
-        }
+      setIsAnyNoteActive(val: boolean) {
+        saveAndUpdate("isAnyNoteActive", setIsAnyNoteActive, val);
       },
-      async setAnimations(val: 'On' | 'Off') {
-        try {
-          await AsyncStorage.setItem("animations", JSON.stringify(val));
-          setAnimations(val);
-        } catch (err) {
-          alert(err);
-          console.log("err", err);
-        }
+      setIsRecycleBinEmpty(val: boolean) {
+        saveAndUpdate("isRecycleBinEmpty", setIsRecycleBinEmpty, val);
+      },
+      setAnimations(val: "On" | "Off") {
+        saveAndUpdate("animations", setAnimations, val);
       },
     },
+  };
+
+  const saveAndUpdate = async (save: string, update: any, value: any) => {
+    // FilesystemStorage.setItem(save, value)
+    //   .then((res) => update(value))
+    //   .catch((err) => alert(err));
+
+    try {
+      await FilesystemStorage.setItem(save, value);
+      update(value);
+    } catch (err) {
+      alert(err);
+      console.log("err", err);
+    }
+    // FilesystemStorage.getItem("testing")
+    //   .then((res) => console.log("res", res))
+    //   .catch((err) => console.log("err", err));
+    // try {
+    //   await AsyncStorage.setItem(save, JSON.stringify(value));
+    //   update(value);
+    // } catch (err) {
+    //   alert(err);
+    //   console.log("err", err);
+    // }
   };
   // AsyncStorage.removeItem('knowSpacedRepetition')
   // AsyncStorage.removeItem("firstNote");
@@ -155,15 +162,6 @@ export function AppProvider(props: any) {
   // AsyncStorage.removeItem('subs')
   // AsyncStorage.removeItem('animations')
 
-  // contextValue.actions.setSubs([
-  //   "English",
-  //   "Math",
-  //   "Geography",
-  //   "History",
-  //   "jalapino",
-  //   "HTML",
-  //   "--None--",
-  // ]);
   const setItem = async (toSet: any, itemName: string) => {
     const value = await AsyncStorage.getItem(itemName);
     if (value) {
@@ -219,18 +217,19 @@ export function AppProvider(props: any) {
     setItem(setAnimations, "animations");
   }, []);
 
-  useEffect(() => {
-    if (subs.length !== 0 && !subs[0].id) {
-      let newSubStructure: any = [];
-      subs.forEach((v: any) => {
-        newSubStructure.push({
-          id: uuidV4(),
-          title: v,
-        });
-      });
-      contextValue.actions.setSubs(newSubStructure);
-    }
-  }, [subs]);
+  // state refactoring
+  // useEffect(() => {
+  //   if (subs.length !== 0 && !subs[0].id) {
+  //     let newSubStructure: any = [];
+  //     subs.forEach((v: any) => {
+  //       newSubStructure.push({
+  //         id: uuidV4(),
+  //         title: v,
+  //       });
+  //     });
+  //     contextValue.actions.setSubs(newSubStructure);
+  //   }
+  // }, [subs]);
 
   return (
     <AppContext.Provider value={contextValue}>

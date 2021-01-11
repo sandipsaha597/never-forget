@@ -62,6 +62,7 @@ export default function AddNote(props: {
         executeFunction: () => {
           setTimeout(() => {
             setFirstNote(false);
+            firstAddNoteFunc(false);
           }, 3000);
         },
       },
@@ -72,6 +73,7 @@ export default function AddNote(props: {
         executeFunction: () => {
           setTimeout(() => {
             setFirstNote(false);
+            firstAddNoteFunc(false);
           }, 3000);
         },
       },
@@ -403,7 +405,7 @@ export async function schedulePushNotification(
               );
         Notifications.scheduleNotificationAsync({
           content: {
-            title: i + "Review your notes, so you Never Forget them! 📔",
+            title: "Review your notes, so you Never Forget them! 📔",
             body: body,
           },
           identifier: format(revisionDate, "dd-MM-yyyy"),
@@ -414,3 +416,12 @@ export async function schedulePushNotification(
     );
   }
 }
+
+const firstAddNoteFunc = async (value: boolean) => {
+  try {
+    await AsyncStorage.setItem("firstNote", JSON.stringify(value));
+  } catch (err) {
+    alert(err);
+    console.log("err", err);
+  }
+};

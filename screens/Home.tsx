@@ -7,7 +7,15 @@ import {
   sub,
 } from "date-fns";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  Dimensions,
+  Image,
+  LayoutAnimation,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   FlatList,
   TouchableNativeFeedback,
@@ -36,6 +44,7 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
   const [notesToRevise, setNotesToRevise] = useState<boolean>(true);
   const currentRewardMsg = useRef("Well done");
   const [rewardIcon, setRewardIcon] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const { showAddNote } = props;
 
   useEffect(() => {
@@ -130,7 +139,7 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
     const refreshFunc = () => {
       const refreshTime =
         differenceInSeconds(
-          add(startOfDay(new Date()), { days: 0, hours: 12 }),
+          add(startOfDay(new Date()), { days: 1 }),
           new Date()
         ) * 1000;
       if (refreshTime > 1000 * 60) {
@@ -139,12 +148,21 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
         }, 1000 * 60);
       } else {
         setTimeout(() => {
-          console.log("refresh Home");
-          setNotesToRevise(!!haveNotesToRevise(allNotes));
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setRefreshing(true);
+          setTimeout(() => {
+            setNotesToRevise(!!haveNotesToRevise(allNotes));
+            setTimeout(() => {
+              LayoutAnimation.configureNext(
+                LayoutAnimation.Presets.easeInEaseOut
+              );
+              setRefreshing(false);
+            }, 1000);
+          }, 1000);
         }, refreshTime);
       }
     };
-    refreshFunc()
+    refreshFunc();
   }, []);
 
   return (
@@ -257,9 +275,45 @@ export default function Home(props: { showAddNote: (value: number) => void }) {
           <Ionicons name='ios-add-circle' size={70} color='#3178c6' />
         </TouchableOpacity>
       </View>
+      {refreshing && <Refreshing />}
     </>
   );
 }
+
+const Refreshing = () => {
+  const [count, setCount] = useState(3);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setCount(2);
+    }, 1000);
+
+    setTimeout(() => {
+      setCount(1);
+    }, 2000);
+
+    setTimeout(() => {
+      setCount(0);
+    }, 3000);
+  }, []);
+  return (
+    <View
+      style={{
+        width: "100%",
+        height: Dimensions.get("window").height,
+        backgroundColor: "rgba(0,0,0,.4)",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text style={{ fontSize: 20 }}>Refreshing...</Text>
+      <Text style={{ fontSize: 160, includeFontPadding: false }}>{count}</Text>
+    </View>
+  );
+};
 
 const ReviewBox = (props: {
   note: IAllNotes;

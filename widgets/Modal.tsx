@@ -20,13 +20,12 @@ import { AppContext } from "../AppContext/AppContext";
 
 export default function Modal(props: {
   text: string;
-  noChat?: boolean;
   center?: boolean;
   color?: string;
   chatObj?: any;
   scroll?: boolean;
 }) {
-  const { text, noChat, center, color, chatObj, scroll } = props;
+  const { text, center, color, chatObj, scroll } = props;
   const [chat, setChat] = useState<any>(chatObj);
 
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function Modal(props: {
   const opacityValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (noChat) {
+    if (!chatObj) {
       setTimeout(() => {
         Animated.timing(bottomValue, {
           toValue: Dimensions.get("window").height / 2 + 20,
@@ -84,8 +83,6 @@ export default function Modal(props: {
     }
     setChat(tempChat);
 
-    firstAddNoteFunc(false);
-
     if (executeFunction) {
       executeFunction();
     }
@@ -108,15 +105,6 @@ export default function Modal(props: {
       duration: 400,
       easing: Easing.ease,
     }).start();
-  };
-
-  const firstAddNoteFunc = async (value: boolean) => {
-    try {
-      await AsyncStorage.setItem("firstNote", JSON.stringify(value));
-    } catch (err) {
-      alert(err);
-      console.log("err", err);
-    }
   };
 
   const scrollViewRef = useRef<any>();
@@ -224,7 +212,7 @@ export default function Modal(props: {
           )}
         </View>
 
-        {!noChat &&
+        {!!chatObj &&
           chat.map((v: any, i1: number) => {
             const isReply = i1 % 2 === 0;
             return (
