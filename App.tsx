@@ -24,6 +24,7 @@ import Modal from "./widgets/Modal";
 import Settings from "./screens/Settings";
 import * as Notifications from "expo-notifications";
 import { add, differenceInSeconds, startOfDay } from "date-fns";
+import { id } from "date-fns/esm/locale";
 
 const getFonts = () =>
   Font.loadAsync({
@@ -99,8 +100,10 @@ const Main = () => {
 
   useEffect(() => {
     if (isAnyNoteActive) {
+      console.log("isAnyNoteActive set", isAnyNoteActive);
       Notifications.cancelScheduledNotificationAsync("SS-EmptyNoteBox");
-    } else {
+    } else if (isAnyNoteActive === false) {
+      console.log("isAnyNoteActive set", isAnyNoteActive);
       Notifications.getAllScheduledNotificationsAsync().then((v) => {
         const notificationExist = v.find((v2) =>
           v2.identifier.startsWith("SS-")
